@@ -4,6 +4,7 @@ Custom component to get Islamic Prayer Times.
 For more details about this component, please refer to the documentation at
 https://github.com/amaharek/Muslim-Prayer-Companion
 """
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -22,7 +23,9 @@ CONFIG_SCHEMA = cv.removed(DOMAIN, raise_if_present=False)
 
 
 async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
-    """Set up the Islamic Prayer Component."""
+    """
+    Set up the Islamic Prayer Component.
+    """
     coordinator = IslamicPrayerDataUpdateCoordinator(hass)
     await coordinator.async_config_entry_first_refresh()
 
@@ -51,4 +54,7 @@ async def async_options_updated(hass: HomeAssistant, entry: ConfigEntry) -> None
     coordinator: IslamicPrayerDataUpdateCoordinator = hass.data[DOMAIN]
     if coordinator.event_unsub:
         coordinator.event_unsub()
+    await coordinator.async_request_refresh()
+
+    coordinator: IslamicPrayerDataUpdateCoordinator = hass.data[DOMAIN]
     await coordinator.async_request_refresh()

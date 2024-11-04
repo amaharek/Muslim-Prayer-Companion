@@ -1,15 +1,15 @@
-"""Platform to retrieve Islamic prayer times information for Home Assistant."""
+"""Platform to retrieve Muslim Prayer Companion information for Home Assistant."""
+
 from datetime import datetime
 
 from homeassistant.components.sensor import (
-    SensorDeviceClass,
     SensorEntity,
     SensorEntityDescription,
 )
+from homeassistant.components.sensor.const import SensorDeviceClass
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.device_registry import DeviceEntryType
-from homeassistant.helpers.entity import DeviceInfo
+from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
@@ -53,7 +53,9 @@ async def async_setup_entry(
     config_entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up the Islamic prayer times sensor platform."""
+    """
+    Set up the Islamic prayer times sensor platform.
+    """
 
     coordinator: IslamicPrayerDataUpdateCoordinator = hass.data[DOMAIN]
 

@@ -1,4 +1,4 @@
-"""Config flow for Islamic Prayer Times integration."""
+"""Config flow for Muslim Prayer Times integration."""
 from __future__ import annotations
 
 from typing import Any

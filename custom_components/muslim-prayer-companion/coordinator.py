@@ -1,5 +1,5 @@
 """
-Islamic Prayer Times Coordinator
+Muslim Prayer Companion Coordinator
 """
 
 from __future__ import annotations
@@ -18,7 +18,7 @@ from homeassistant.helpers.event import async_call_later, async_track_point_in_t
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 import homeassistant.util.dt as dt_util
 
-from .const import CONF_CALC_METHOD, DEFAULT_CALC_METHOD, DOMAIN
+from .const import CONF_CALC_METHOD, DEFAULT_CALC_METHOD
 from .const import DOMAIN, LOGGER
 
 
@@ -195,7 +195,7 @@ class IslamicPrayerDataUpdateCoordinator(DataUpdateCoordinator[dict[str, datetim
             hass=hass,
             logger=LOGGER,
             name=DOMAIN,
-            update_interval=timedelta(hours=1),
+            update_interval=timedelta(minutes=15),  # Update interval set to 30 minutes
         )
 
     @property
