@@ -7,7 +7,7 @@ along with other calculation methods ignored in the built-in one such as Egypt, 
 * Copy the islamic_prayer_times_ie directory into the custom_components directory of home assistant.
 * Reboot your Home assistant.
 * Go to Integration section in home assistant.
-* Press Add Integration, search for "Islamic Prayer Times - IE".
+* Press Add Integration, search for "Muslim Prayer Companion".
 * Dublin, Ireland prayer times are included in:
   * ie-icci >> Islamic Culture Centre - https://islamireland.ie/
     * NOTE: you may find prayers shifted one day older in the year of Feb 29th.
