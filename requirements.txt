@@ -1,0 +1,2 @@
+homeassistant==2024.6.0
+prayer_times_calculator==0.0.6
