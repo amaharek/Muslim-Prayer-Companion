@@ -1,2 +1,3 @@
-homeassistant==2024.6.0
-prayer_times_calculator==0.0.6
+homeassistant==2024.10.4
+prayer_times_calculator==0.0.12
+ruff==0.7.2
