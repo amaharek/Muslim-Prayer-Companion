@@ -1,5 +1,5 @@
 """
-Islamic Prayer Times Coordinator
+Muslim Prayer Companion Coordinator
 """
 
 from __future__ import annotations
