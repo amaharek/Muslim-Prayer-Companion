@@ -13,7 +13,7 @@ from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from . import IslamicPrayerDataUpdateCoordinator
+from . import MuslimPrayerCompanionDataUpdateCoordinator
 from .const import DOMAIN, NAME
 
 SENSOR_TYPES: tuple[SensorEntityDescription, ...] = (
@@ -57,7 +57,7 @@ async def async_setup_entry(
     Set up the Islamic prayer times sensor platform.
     """
 
-    coordinator: IslamicPrayerDataUpdateCoordinator = hass.data[DOMAIN]
+    coordinator: MuslimPrayerCompanionDataUpdateCoordinator = hass.data[DOMAIN]
 
     async_add_entities(
         IslamicPrayerTimeSensor(coordinator, description)
@@ -66,7 +66,7 @@ async def async_setup_entry(
 
 
 class IslamicPrayerTimeSensor(
-    CoordinatorEntity[IslamicPrayerDataUpdateCoordinator], SensorEntity
+    CoordinatorEntity[MuslimPrayerCompanionDataUpdateCoordinator], SensorEntity
 ):
     """Representation of an Islamic prayer time sensor."""
 
@@ -75,7 +75,7 @@ class IslamicPrayerTimeSensor(
 
     def __init__(
         self,
-        coordinator: IslamicPrayerDataUpdateCoordinator,
+        coordinator: MuslimPrayerCompanionDataUpdateCoordinator,
         description: SensorEntityDescription,
     ) -> None:
         """Initialize the Islamic prayer time sensor."""

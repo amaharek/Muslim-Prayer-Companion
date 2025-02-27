@@ -7,6 +7,8 @@ https://github.com/amaharek/Muslim-Prayer-Companion
 
 from __future__ import annotations
 
+from datetime import timedelta
+
 from typing import TYPE_CHECKING
 
 from homeassistant.config_entries import ConfigEntry
@@ -15,7 +17,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_validation as cv
 
 from .const import DOMAIN
-from .coordinator import IslamicPrayerDataUpdateCoordinator
+from .coordinator import MuslimPrayerCompanionDataUpdateCoordinator
 
 PLATFORMS = [Platform.SENSOR]
 
@@ -26,7 +28,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     """
     Set up the Islamic Prayer Component.
     """
-    coordinator = IslamicPrayerDataUpdateCoordinator(hass)
+    coordinator = MuslimPrayerCompanionDataUpdateCoordinator(hass)
     await coordinator.async_config_entry_first_refresh()
 
     hass.data.setdefault(DOMAIN, coordinator)
@@ -43,7 +45,7 @@ async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> 
     if unload_ok := await hass.config_entries.async_unload_platforms(
         config_entry, PLATFORMS
     ):
-        coordinator: IslamicPrayerDataUpdateCoordinator = hass.data.pop(DOMAIN)
+        coordinator: MuslimPrayerCompanionDataUpdateCoordinator = hass.data.pop(DOMAIN)
         if coordinator.event_unsub:
             coordinator.event_unsub()
     return unload_ok
@@ -51,10 +53,10 @@ async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> 
 
 async def async_options_updated(hass: HomeAssistant, entry: ConfigEntry) -> None:
     """Triggered by config entry options updates."""
-    coordinator: IslamicPrayerDataUpdateCoordinator = hass.data[DOMAIN]
+    coordinator: MuslimPrayerCompanionDataUpdateCoordinator = hass.data[DOMAIN]
     if coordinator.event_unsub:
         coordinator.event_unsub()
     await coordinator.async_request_refresh()
 
-    coordinator: IslamicPrayerDataUpdateCoordinator = hass.data[DOMAIN]
+    coordinator: MuslimPrayerCompanionDataUpdateCoordinator = hass.data[DOMAIN]
     await coordinator.async_request_refresh()

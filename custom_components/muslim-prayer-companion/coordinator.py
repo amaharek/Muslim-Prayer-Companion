@@ -182,7 +182,9 @@ def getPrayersByWPPlugin(url, name, st_maghrib, midnight):
             return None
 
 
-class IslamicPrayerDataUpdateCoordinator(DataUpdateCoordinator[dict[str, datetime]]):
+class MuslimPrayerCompanionDataUpdateCoordinator(
+    DataUpdateCoordinator[dict[str, datetime]]
+):
     """Islamic Prayer Client Object."""
 
     config_entry: ConfigEntry
@@ -195,7 +197,8 @@ class IslamicPrayerDataUpdateCoordinator(DataUpdateCoordinator[dict[str, datetim
             hass=hass,
             logger=LOGGER,
             name=DOMAIN,
-            update_interval=timedelta(minutes=15),  # Update interval set to 30 minutes
+            # Update interval set to 30 minutes
+            update_interval=timedelta(minutes=60),
         )
 
     @property
