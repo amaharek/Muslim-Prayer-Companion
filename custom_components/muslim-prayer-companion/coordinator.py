@@ -180,17 +180,68 @@ class MuslimPrayerCompanionDataUpdateCoordinator(DataUpdateCoordinator[dict[str,
         """Return the calculation method."""
         return self.config_entry.options.get(CONF_CALC_METHOD, DEFAULT_CALC_METHOD)
 
+    def get_hijri_date(self) -> dict[str, str]:
+        """Fetch Hijri date."""
+        calc = PrayerTimesCalculator(
+            latitude=self.hass.config.latitude,
+            longitude=self.hass.config.longitude,
+            calculation_method=self.calc_method,
+            date=str(dt_util.now().date()),
+        )
+
+        hijri_date = calc["data"]["hijri"]["date"] # DD-MM-YYYY
+        hijri_day = calc["data"]["hijri"]["day"]
+        hijri_month_num = calc["data"]["hijri"]["month"]["number"]
+        hijri_month_readable = calc["data"]["hijri"]["month"]["en"]
+        hijri_year = calc["data"]["hijri"]["year"] 
+        hijri_day_month_readable = f"{hijri_day}-{hijri_month_readable}"
+        hijri_date_readable = f"{hijri_day}-{hijri_month_readable}-{hijri_year}"
+        
+        data = {
+            'hijri_date': hijri_date,
+            'hijri_day': hijri_day,
+            'hijri_month_num': hijri_month_num,
+            'hijri_month_readable': hijri_month_readable,
+            'hijri_year': hijri_year,
+            'hijri_date_readable': hijri_date_readable,
+            'hijri_day_month_readable': hijri_day_month_readable
+        }
+
+        return data
+
     def get_new_prayer_times(self) -> dict[str, str]:
         """Fetch prayer times for today."""
         calc_method = self.calc_method
         LOGGER.debug(calc_method)
 
+        calculated_prayer_time = self._get_prayer_times_standard()
+
         if calc_method == "ie-icci":
-            return self._get_prayer_times_ie_icci()
+            prayer_times = self._get_prayer_times_ie_icci()
         elif calc_method in ["ie-mcnd", "ie-hicc"]:
-            return self._get_prayer_times_wp_plugin(calc_method)
+            prayer_times = self._get_prayer_times_wp_plugin(calc_method)
         else:
-            return self._get_prayer_times_standard()
+            prayer_times = calculated_prayer_time
+
+        hijri_date = calculated_prayer_time['date']['hijri']['date'] # DD-MM-YYYY
+        hijri_day = calculated_prayer_time['date']['hijri']['day']
+        hijri_month_num = calculated_prayer_time['date']['hijri']['month']['number']
+        hijri_month_readable = calculated_prayer_time['date']['hijri']['month']['en']
+        hijri_year = calculated_prayer_time['date']['hijri']['year'] 
+        hijri_day_month_readable = f"{hijri_day}-{hijri_month_readable}"
+        hijri_date_readable = f"{hijri_day}-{hijri_month_readable}-{hijri_year}"
+
+        data = {**prayer_times}
+        data['hijri_date'] = hijri_date
+        data['hijri_day'] = hijri_day
+        data['hijri_month_num'] = hijri_month_num
+        data['hijri_month_readable'] = hijri_month_readable
+        data['hijri_year'] = hijri_year
+        data['hijri_date_readable'] = hijri_date_readable
+        data['hijri_day_month_readable'] = hijri_day_month_readable 
+        
+
+        return data
 
     def _get_prayer_times_ie_icci(self) -> dict[str, str]:
         """Fetch prayer times for 'ie-icci' calculation method."""
@@ -288,11 +339,17 @@ class MuslimPrayerCompanionDataUpdateCoordinator(DataUpdateCoordinator[dict[str,
         """Update sensors with new prayer times."""
         try:
             prayer_times = await self.hass.async_add_executor_job(self.get_new_prayer_times)
+            hijri_date = await self.hass.async_add_executor_job(self.get_hijri_date)
+
         except (exceptions.InvalidResponseError, ConnError) as err:
             async_call_later(self.hass, 60, self.async_request_update)
             raise UpdateFailed from err
 
+
         prayer_times_info = {prayer: dt_util.as_utc(dt_util.parse_datetime(
             f"{dt_util.now().date()} {time}")) for prayer, time in prayer_times.items()}
+        hijri_date_info = {key: value for key, value in hijri_date.items()}
+        
+
         self.async_schedule_future_update(prayer_times_info["Midnight"])
-        return prayer_times_info
+        return {**prayer_times_info, **hijri_date_info}
