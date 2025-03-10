@@ -67,7 +67,7 @@ def get_standard_sunset_midnight(latitude, longitude, calculation_method):
         calc = PrayerTimesCalculator(
             latitude=latitude,
             longitude=longitude,
-            calculation_method=calculation_method,
+            calculation_method="isna",
             date=str(dt_util.now().date()),
         )
         std_prayers = calc.fetch_prayer_times()
@@ -185,7 +185,7 @@ class MuslimPrayerCompanionDataUpdateCoordinator(DataUpdateCoordinator[dict[str,
         calc = PrayerTimesCalculator(
             latitude=self.hass.config.latitude,
             longitude=self.hass.config.longitude,
-            calculation_method=self.calc_method,
+            calculation_method="isna",
             date=str(dt_util.now().date()),
         )
 
