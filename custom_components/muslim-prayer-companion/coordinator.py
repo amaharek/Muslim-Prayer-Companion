@@ -302,7 +302,7 @@ class MuslimPrayerCompanionDataUpdateCoordinator(DataUpdateCoordinator[dict[str,
         calc = PrayerTimesCalculator(
             latitude=self.hass.config.latitude,
             longitude=self.hass.config.longitude,
-            calculation_method=self.calc_method,
+            calculation_method="isna",
             date=str(dt_util.now().date()),
         )
         return calc.fetch_prayer_times()
