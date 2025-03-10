@@ -5,7 +5,7 @@ Constants for the Islamic Prayer component.
 from typing import Final
 from logging import Logger, getLogger
 
-DOMAIN: Final = "muslim-prayer-companion"
+DOMAIN: Final = "muslim-companion"
 NAME: Final = "Muslim Prayer Companion"
 PRAYER_TIMES_ICON = "mdi:calendar-clock"
 
