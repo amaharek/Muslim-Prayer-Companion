@@ -351,8 +351,9 @@ class MuslimPrayerCompanionDataUpdateCoordinator(DataUpdateCoordinator[dict[str,
                 prayer_times_info[prayer] = dt_util.as_utc(prayer_time)
 
         hijri_date_info: dict[str, datetime] = {}
-        for sensor_name, sensor_val in hijri_date.items():
-            hijri_date_info[sensor_name] = sensor_val
+        # for sensor_name, sensor_val in hijri_date.items():
+        #     hijri_date_info[sensor_name] = sensor_val
+        hijri_date_info['hijri_date'] = dt_util.parse_datetime(hijri_date['hijri_date'])
 
         self.async_schedule_future_update(prayer_times_info["Midnight"])
         return {**prayer_times_info, **hijri_date_info}
