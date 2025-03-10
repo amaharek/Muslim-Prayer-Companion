@@ -188,7 +188,7 @@ class MuslimPrayerCompanionDataUpdateCoordinator(DataUpdateCoordinator[dict[str,
             calculation_method="isna",
             date=str(dt_util.now().date()),
         )
-        hijri_data = calc.fetch_hijri_date().get("date")
+        hijri_data = calc.fetch_prayer_times().get("date")
         
 
         hijri_date = hijri_data["hijri"]["date"] # DD-MM-YYYY
