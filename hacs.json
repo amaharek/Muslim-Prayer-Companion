@@ -1,5 +1,7 @@
 {
     "name": "Muslim Prayer Companion",
     "homeassistant": "2025.2.4",
+    "render_readme": true,
+    "render_changelog": true,
     "hacs": "2.0.1"
 }
