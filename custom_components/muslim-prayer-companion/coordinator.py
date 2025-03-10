@@ -347,9 +347,14 @@ class MuslimPrayerCompanionDataUpdateCoordinator(DataUpdateCoordinator[dict[str,
             async_call_later(self.hass, 60, self.async_request_update)
             raise UpdateFailed from err
 
+        prayer_times_info: dict[str, datetime] = {}
+        for prayer, time in prayer_times.items():
+            if prayer_time := dt_util.parse_datetime(f"{dt_util.now().date()} {time}"):
+                prayer_times_info[prayer] = dt_util.as_utc(prayer_time)
 
-        prayer_times_info = {prayer: dt_util.as_utc(dt_util.parse_datetime(
-            f"{dt_util.now().date()} {time}")) for prayer, time in prayer_times.items()}
+        # prayer_times_info = {prayer: dt_util.as_utc(dt_util.parse_datetime(
+        #     f"{dt_util.now().date()} {time}")) for prayer, time in prayer_times.items()}
+        
         hijri_date_info = {key: value for key, value in hijri_date.items()}
         
 
