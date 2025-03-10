@@ -188,9 +188,7 @@ class MuslimPrayerCompanionDataUpdateCoordinator(DataUpdateCoordinator[dict[str,
             calculation_method="isna",
             date=str(dt_util.now().date()),
         )
-        hijri_data = calc.fetch_prayer_times().get("date")
-        
-
+        hijri_data = calc.fetch_prayer_times().get("date")  
         hijri_date = hijri_data["hijri"]["date"] # DD-MM-YYYY
         hijri_day = hijri_data["hijri"]["day"]
         hijri_month_num = hijri_data["hijri"]["month"]["number"]
@@ -198,7 +196,7 @@ class MuslimPrayerCompanionDataUpdateCoordinator(DataUpdateCoordinator[dict[str,
         hijri_year = hijri_data["hijri"]["year"] 
         hijri_day_month_readable = f"{hijri_day}-{hijri_month_readable}"
         hijri_date_readable = f"{hijri_day}-{hijri_month_readable}-{hijri_year}"
-        
+
         data = {
             'hijri_date': hijri_date,
             'hijri_day': hijri_day,
@@ -352,11 +350,9 @@ class MuslimPrayerCompanionDataUpdateCoordinator(DataUpdateCoordinator[dict[str,
             if prayer_time := dt_util.parse_datetime(f"{dt_util.now().date()} {time}"):
                 prayer_times_info[prayer] = dt_util.as_utc(prayer_time)
 
-        # prayer_times_info = {prayer: dt_util.as_utc(dt_util.parse_datetime(
-        #     f"{dt_util.now().date()} {time}")) for prayer, time in prayer_times.items()}
-        
-        hijri_date_info = {key: value for key, value in hijri_date.items()}
-        
+        hijri_date_info: dict[str, datetime] = {}
+        for sensor_name, sensor_val in hijri_date.items():
+            hijri_date_info[sensor_name] = sensor_val
 
         self.async_schedule_future_update(prayer_times_info["Midnight"])
         return {**prayer_times_info, **hijri_date_info}
