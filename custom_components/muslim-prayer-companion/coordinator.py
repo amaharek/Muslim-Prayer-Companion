@@ -188,12 +188,14 @@ class MuslimPrayerCompanionDataUpdateCoordinator(DataUpdateCoordinator[dict[str,
             calculation_method="isna",
             date=str(dt_util.now().date()),
         )
+        hijri_data = calc.fetch_hijri_date().get("date")
+        
 
-        hijri_date = calc["date"]["hijri"]["date"] # DD-MM-YYYY
-        hijri_day = calc["date"]["hijri"]["day"]
-        hijri_month_num = calc["date"]["hijri"]["month"]["number"]
-        hijri_month_readable = calc["date"]["hijri"]["month"]["en"]
-        hijri_year = calc["date"]["hijri"]["year"] 
+        hijri_date = hijri_data["hijri"]["date"] # DD-MM-YYYY
+        hijri_day = hijri_data["hijri"]["day"]
+        hijri_month_num = hijri_data["hijri"]["month"]["number"]
+        hijri_month_readable = hijri_data["hijri"]["month"]["en"]
+        hijri_year = hijri_data["hijri"]["year"] 
         hijri_day_month_readable = f"{hijri_day}-{hijri_month_readable}"
         hijri_date_readable = f"{hijri_day}-{hijri_month_readable}-{hijri_year}"
         
