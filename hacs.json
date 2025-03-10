@@ -1,7 +1,7 @@
 {
     "name": "Muslim Prayer Companion",
-    "hide_default_branch": true,
-    "homeassistant": "2024.6.0",
-    "render_readme": true
+    "homeassistant": "2025.2.4",
+    "render_readme": true,
+    "render_changelog": true,
+    "hacs": "2.0.1"
 }
-  
