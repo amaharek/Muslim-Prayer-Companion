@@ -12,8 +12,8 @@ from homeassistant.data_entry_flow import FlowResult
 from .const import CALC_METHODS, CONF_CALC_METHOD, DEFAULT_CALC_METHOD, DOMAIN, NAME
 
 
-class IslamicPrayerFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
-    """Handle the Islamic Prayer config flow."""
+class MuslimPrayerCompanionFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
+    """Handle the Muslim Prayer config flow."""
 
     VERSION = 1
 
@@ -21,9 +21,9 @@ class IslamicPrayerFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     @callback
     def async_get_options_flow(
         config_entry: config_entries.ConfigEntry,
-    ) -> IslamicPrayerOptionsFlowHandler:
+    ) -> MuslimPrayerCompanionOptionsFlowHandler:
         """Get the options flow for this handler."""
-        return IslamicPrayerOptionsFlowHandler(config_entry)
+        return MuslimPrayerCompanionOptionsFlowHandler(config_entry)
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
@@ -38,8 +38,8 @@ class IslamicPrayerFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_create_entry(title=NAME, data=user_input)
 
 
-class IslamicPrayerOptionsFlowHandler(config_entries.OptionsFlow):
-    """Handle Islamic Prayer client options."""
+class MuslimPrayerCompanionOptionsFlowHandler(config_entries.OptionsFlow):
+    """Handle Muslim Prayer client options."""
 
     def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
         """Initialize options flow."""

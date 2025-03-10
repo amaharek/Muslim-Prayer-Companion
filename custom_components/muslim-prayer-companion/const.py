@@ -1,5 +1,5 @@
 """
-Constants for the Islamic Prayer component.
+Constants for the Muslim Prayer component.
 """
 
 from typing import Final
@@ -33,5 +33,5 @@ CALC_METHODS = [
 
 DEFAULT_CALC_METHOD: Final = "ie-icci"
 
-DATA_UPDATED = "Islamic_prayer_data_updated"
+DATA_UPDATED = "Muslim_prayer_data_updated"
 LOGGER: Logger = getLogger(__package__)

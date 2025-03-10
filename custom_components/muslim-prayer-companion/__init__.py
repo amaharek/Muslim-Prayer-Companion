@@ -23,7 +23,7 @@ CONFIG_SCHEMA = cv.removed(DOMAIN, raise_if_present=False)
 
 
 async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
-    """Set up the Islamic Prayer Component."""
+    """Set up the Muslim Prayer Component."""
     coordinator = MuslimPrayerCompanionDataUpdateCoordinator(hass)
     await coordinator.async_config_entry_first_refresh()
 
@@ -35,7 +35,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
 
 
 async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
-    """Unload Islamic Prayer entry from config_entry."""
+    """Unload Muslim Prayer entry from config_entry."""
     if unload_ok := await hass.config_entries.async_unload_platforms(config_entry, PLATFORMS):
         coordinator: MuslimPrayerCompanionDataUpdateCoordinator = hass.data.pop(DOMAIN)
         if coordinator.event_unsub:

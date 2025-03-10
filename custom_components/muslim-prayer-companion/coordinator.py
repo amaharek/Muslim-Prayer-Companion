@@ -161,7 +161,7 @@ def get_prayers_by_wp_plugin(url, name, standard_maghrib, midnight):
 
 
 class MuslimPrayerCompanionDataUpdateCoordinator(DataUpdateCoordinator[dict[str, datetime]]):
-    """Islamic Prayer Client Object."""
+    """Muslim Prayer Client Object."""
 
     config_entry: ConfigEntry
 

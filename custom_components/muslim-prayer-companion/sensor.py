@@ -87,15 +87,15 @@ async def async_setup_entry(
     coordinator: MuslimPrayerCompanionDataUpdateCoordinator = hass.data[DOMAIN]
 
     async_add_entities(
-        IslamicPrayerTimeSensor(coordinator, description)
+        MuslimPrayerCompanionTimeSensor(coordinator, description)
         for description in SENSOR_TYPES
     )
 
 
-class IslamicPrayerTimeSensor(
+class MuslimPrayerCompanionTimeSensor(
     CoordinatorEntity[MuslimPrayerCompanionDataUpdateCoordinator], SensorEntity
 ):
-    """Representation of an Islamic prayer time sensor."""
+    """Representation of an Muslim prayer time sensor."""
 
     _attr_device_class = SensorDeviceClass.TIMESTAMP
     _attr_has_entity_name = True
@@ -105,7 +105,7 @@ class IslamicPrayerTimeSensor(
         coordinator: MuslimPrayerCompanionDataUpdateCoordinator,
         description: SensorEntityDescription,
     ) -> None:
-        """Initialize the Islamic prayer time sensor."""
+        """Initialize the Muslim prayer time sensor."""
         super().__init__(coordinator)
         self.entity_description = description
         self._attr_unique_id = description.key
