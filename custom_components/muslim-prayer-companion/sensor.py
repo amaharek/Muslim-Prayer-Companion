@@ -45,6 +45,34 @@ SENSOR_TYPES: tuple[SensorEntityDescription, ...] = (
         key="Midnight",
         name="Midnight time",
     ),
+    SensorEntityDescription(
+        key="hijri_date",
+        name="Hijri Date",
+    ),
+    SensorEntityDescription(
+        key="hijri_day",
+        name="Hijri Day",
+    ),
+    SensorEntityDescription(
+        key="hijri_month_num",
+        name="Hijri Month Number",
+    ),
+    SensorEntityDescription(
+        key="hijri_month_readable",
+        name="Hijri Month",
+    ),
+    SensorEntityDescription(
+        key="hijri_year",
+        name="Hijri Year",
+    ),
+    SensorEntityDescription(
+        key="hijri_date_readable",
+        name="Hijri Date Readable",
+    ),
+    SensorEntityDescription(
+        key="hijri_day_month_readable",
+        name="Hijri Day and Month",
+    ),
 )
 
 
