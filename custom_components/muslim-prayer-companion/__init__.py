@@ -1,5 +1,5 @@
 """
-Custom component to get Islamic Prayer Times.
+Custom component to get Muslim Prayer Companion.
 
 For more details about this component, please refer to the documentation at
 https://github.com/amaharek/Muslim-Prayer-Companion

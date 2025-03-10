@@ -54,7 +54,7 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """
-    Set up the Islamic prayer times sensor platform.
+    Set up the Muslim Prayer Companion sensor platform.
     """
 
     coordinator: MuslimPrayerCompanionDataUpdateCoordinator = hass.data[DOMAIN]

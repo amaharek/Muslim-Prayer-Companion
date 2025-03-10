@@ -307,7 +307,7 @@ class MuslimPrayerCompanionDataUpdateCoordinator(
         calculated midnight = 1:35AM (after traditional midnight)
         update time: 1:36AM.
         """
-        LOGGER.debug("Scheduling next update for Islamic prayer times")
+        LOGGER.debug("Scheduling next update for Muslim Prayer Companion")
 
         now = dt_util.utcnow()
 
