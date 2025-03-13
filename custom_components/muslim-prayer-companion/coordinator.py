@@ -139,6 +139,15 @@ def get_hour_offset_fix(non_standard_str: str, standard_str: str) -> int:
 def get_prayers_by_wp_plugin(url: str, name: str, standard_maghrib: str, midnight: str):
     """
     Get the prayers from a WordPress site with the Daily Prayer Time plugin.
+
+    Args:
+        url (str): URL to fetch prayers from
+        name (str): Name of the calculation method
+        standard_maghrib (str): Standard Maghrib time
+        midnight (str): Midnight time
+
+    Returns:
+        dict: Prayer times information
     """
     json_resp = get_json_response(url)
     if json_resp:

@@ -13,7 +13,8 @@ CONF_CALC_METHOD: Final = "calculation_method"
 CONF_USE_API: Final = "use_api"  # Option to choose API-based prayer times.
 CONF_API_KEY: Final = "api_key"  # API key if required.
 CONF_IQAMAH_OFFSETS: Final = "iqamah_offsets"  # Offsets (in minutes) for Iqamah times.
-
+DEFAULT_IQAMAH_METHOD: Final = "offset" 
+CONF_IQAMAH_METHOD = "iqamah_method"
 DEFAULT_IQAMAH_OFFSETS = {
     "Fajr": 20,
     "Dhuhr": 15,
