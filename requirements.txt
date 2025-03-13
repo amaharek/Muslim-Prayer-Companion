@@ -3,3 +3,4 @@ homeassistant==2025.2.4
 pip>=21.3.1
 ruff==0.9.6
 prayer_times_calculator==0.0.12
+hijri-converter==2.3.1

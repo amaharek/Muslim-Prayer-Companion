@@ -1,9 +1,7 @@
 {
   "domain": "muslim-prayer-companion",
   "name": "Muslim Companion",
-  "codeowners": [
-    "@amaharek"
-  ],
+  "codeowners": ["@amaharek"],
   "config_flow": true,
   "issue_tracker": "https://github.com/amaharek/muslim-prayer-companion/issues",
   "documentation": "https://github.com/amaharek/muslim-prayer-companion",
