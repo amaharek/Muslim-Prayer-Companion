@@ -1,5 +1,6 @@
 """Platform to retrieve Muslim Prayer Companion information for Home Assistant."""
 from datetime import datetime
+from logging import getLogger
 
 from homeassistant.components.sensor import SensorEntity, SensorEntityDescription
 from homeassistant.components.sensor.const import SensorDeviceClass
@@ -12,6 +13,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from . import MuslimPrayerCompanionDataUpdateCoordinator
 from .const import DOMAIN, NAME
 
+_LOGGER = getLogger(__package__)
 SENSOR_TYPES: tuple[SensorEntityDescription, ...] = (
     # Prayer Times
     SensorEntityDescription(key="Fajr", name="Fajr Prayer", device_class=SensorDeviceClass.TIMESTAMP),
@@ -78,7 +80,9 @@ class MuslimPrayerCompanionTimeSensor(
     @property
     def native_value(self):
         """Return the state of the sensor."""
-        value = self.coordinator.data.get(self.entity_description.key)
+        value = self.coordinator.data.get(self.entity_description.key, "23:59")
+        if value == "23:59":
+            _LOGGER.error("No value found for %s", self.entity_description.key)
         return value
 
     @property
