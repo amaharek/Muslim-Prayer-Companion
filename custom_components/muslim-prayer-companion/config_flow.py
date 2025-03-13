@@ -18,18 +18,18 @@ from .const import (
 DATA_SCHEMA = vol.Schema(
     {
         vol.Required("calculation_method", default=DEFAULT_CALC_METHOD): vol.In(CALC_METHODS),
-        vol.Required("iqamah_method", default=DEFAULT_IQAMAH_METHOD): vol.In(["offset", "api"]),
+        # vol.Required("iqamah_method", default=DEFAULT_IQAMAH_METHOD): vol.In(["offset", "api"]),
         # For offset-based iqamah, expect a mapping for each prayer. Offsets in minutes.
-        vol.Optional("iqamah_offsets", default=DEFAULT_IQAMAH_OFFSETS): {
-            vol.Optional("Fajr", default=DEFAULT_IQAMAH_OFFSETS["Fajr"]): vol.Coerce(int),
-            vol.Optional("Dhuhr", default=DEFAULT_IQAMAH_OFFSETS["Dhuhr"]): vol.Coerce(int),
-            vol.Optional("Asr", default=DEFAULT_IQAMAH_OFFSETS["Asr"]): vol.Coerce(int),
-            vol.Optional("Maghrib", default=DEFAULT_IQAMAH_OFFSETS["Maghrib"]): vol.Coerce(int),
-            vol.Optional("Isha", default=DEFAULT_IQAMAH_OFFSETS["Isha"]): vol.Coerce(int),
-        },
+        # vol.Optional("iqamah_offsets", default=DEFAULT_IQAMAH_OFFSETS): {
+        #     vol.Optional("Fajr", default=DEFAULT_IQAMAH_OFFSETS["Fajr"]): vol.Coerce(int),
+        #     vol.Optional("Dhuhr", default=DEFAULT_IQAMAH_OFFSETS["Dhuhr"]): vol.Coerce(int),
+        #     vol.Optional("Asr", default=DEFAULT_IQAMAH_OFFSETS["Asr"]): vol.Coerce(int),
+        #     vol.Optional("Maghrib", default=DEFAULT_IQAMAH_OFFSETS["Maghrib"]): vol.Coerce(int),
+        #     vol.Optional("Isha", default=DEFAULT_IQAMAH_OFFSETS["Isha"]): vol.Coerce(int),
+        # },
         # Optionally allow user to override API endpoints if using API-based methods.
-        vol.Optional("custom_prayer_api"): str,
-        vol.Optional("custom_iqamah_api"): str,
+        # vol.Optional("custom_prayer_api"): str,
+        # vol.Optional("custom_iqamah_api"): str,
     }
 )
 
