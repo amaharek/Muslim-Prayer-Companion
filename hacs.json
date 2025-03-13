@@ -1,7 +1,9 @@
 {
     "name": "Muslim Prayer Companion",
-    "homeassistant": "2025.2.4",
+    "description": "Integration for calculating Muslim prayer times, Hijri date, and Iqamah times.",
     "render_readme": true,
-    "render_changelog": true,
+    "domains": ["sensor"],
+    "iot_class": "cloud_polling",
+    "homeassistant": "2025.2.4", 
     "hacs": "2.0.1"
-}
+  }
