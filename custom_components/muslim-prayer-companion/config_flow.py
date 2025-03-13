@@ -6,14 +6,19 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.const import CONF_LATITUDE, CONF_LONGITUDE
 from homeassistant.data_entry_flow import FlowResult
+from logging import getLogger
 
-from .const import (
-    DOMAIN,
-    CALC_METHODS,
-    DEFAULT_CALC_METHOD,
-    # DEFAULT_IQAMAH_METHOD,
-    # DEFAULT_IQAMAH_OFFSETS,
-)
+_LOGGER = getLogger(__package__)
+try:
+    from .const import (
+        DOMAIN,
+        CALC_METHODS,
+        DEFAULT_CALC_METHOD,
+        # DEFAULT_IQAMAH_METHOD,
+        # DEFAULT_IQAMAH_OFFSETS,
+    )
+except ImportError as e:
+    _LOGGER.error(f"Error importing constants: {e}")
 
 DATA_SCHEMA = vol.Schema(
     {
