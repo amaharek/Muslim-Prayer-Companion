@@ -365,14 +365,16 @@ class MuslimPrayerCompanionDataUpdateCoordinator(DataUpdateCoordinator[dict[str,
         for prayer, time_str in raw_prayer_times.items():
             try:
                 if isinstance(time_str, str):
-                    candidate = dt_util.parse_datetime(f"{today} {time_str}")
-                    if candidate.tzinfo is None:  # Ensure it's timezone-aware
-                        candidate = dt_util.as_local(candidate)  # Convert naive to local timezone
+                    candidate = datetime.strptime(time_str, "%H:%M")
+                    candidate = candidate.replace(
+                        year=today.year, month=today.month, day=today.day
+                    )
+                    candidate = dt_util.as_local(candidate)  # Convert to local time
+
                     if candidate < now:
-                        candidate = dt_util.parse_datetime(f"{today + timedelta(days=1)} {time_str}")
-                        if candidate.tzinfo is None:
-                            candidate = dt_util.as_local(candidate)
-                    prayer_times_dt[prayer] = dt_util.as_utc(candidate)  # Ensure it's UTC
+                        candidate = candidate + timedelta(days=1)  # Move to next day if needed
+
+                    prayer_times_dt[prayer] = dt_util.as_utc(candidate)  # Convert to UTC-aware
                 else:
                     LOGGER.error(f"Error parsing prayer time for {prayer}: time_str is not a string")
             except Exception as e:
