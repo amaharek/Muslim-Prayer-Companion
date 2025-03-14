@@ -326,7 +326,7 @@ class MuslimPrayerCompanionDataUpdateCoordinator(DataUpdateCoordinator[dict[str,
                 except Exception as e:
                     LOGGER.error(f"Error parsing IQamah API response: {e}")
         return iqamah
-
+    
     @callback
     def async_schedule_future_update(self, midnight_dt: datetime) -> None:
         """
@@ -364,15 +364,17 @@ class MuslimPrayerCompanionDataUpdateCoordinator(DataUpdateCoordinator[dict[str,
         # For each prayer time string, determine if the time has already passed; if so, use tomorrow’s date.
         for prayer, time_str in raw_prayer_times.items():
             try:
-                # candidate = dt_util.parse_datetime(f"{today} {time_str}")
-                # LOGGER.info(f"candidate: {candidate}")
-                # candidate = dt_util.as_local(candidate) 
-                # LOGGER.info(f"candidate: {candidate}")
-                # if candidate < now:
-                #     candidate = dt_util.parse_datetime(f"{today + timedelta(days=1)} {time_str}")
-
-                if candidate:=dt_util.parse_datetime(f"{dt_util.now().date()} {time_str}"):
-                    prayer_times_dt[prayer] = dt_util.as_utc(candidate)
+                if isinstance(time_str, str):
+                    candidate = dt_util.parse_datetime(f"{today} {time_str}")
+                    if candidate.tzinfo is None:  # Ensure it's timezone-aware
+                        candidate = dt_util.as_local(candidate)  # Convert naive to local timezone
+                    if candidate < now:
+                        candidate = dt_util.parse_datetime(f"{today + timedelta(days=1)} {time_str}")
+                        if candidate.tzinfo is None:
+                            candidate = dt_util.as_local(candidate)
+                    prayer_times_dt[prayer] = dt_util.as_utc(candidate)  # Ensure it's UTC
+                else:
+                    LOGGER.error(f"Error parsing prayer time for {prayer}: time_str is not a string")
             except Exception as e:
                 LOGGER.error(f"Error parsing prayer time for {prayer}: {e}")
 
@@ -402,8 +404,12 @@ class MuslimPrayerCompanionDataUpdateCoordinator(DataUpdateCoordinator[dict[str,
 
         # Schedule the next update at midnight.
         if "Midnight" in raw_prayer_times:
-            midnight_candidate = dt_util.as_utc(dt_util.parse_datetime(f"{today} {raw_prayer_times['Midnight']}"))
+            midnight_candidate = dt_util.parse_datetime(f"{today} {raw_prayer_times['Midnight']}")
+            if midnight_candidate and midnight_candidate.tzinfo is None:
+                midnight_candidate = dt_util.as_local(midnight_candidate)
             if midnight_candidate < now:
-                midnight_candidate = dt_util.as_utc(dt_util.parse_datetime(f"{today + timedelta(days=1)} {raw_prayer_times['Midnight']}"))
-            self.async_schedule_future_update(midnight_candidate)
+                midnight_candidate = dt_util.parse_datetime(f"{today + timedelta(days=1)} {raw_prayer_times['Midnight']}")
+                if midnight_candidate and midnight_candidate.tzinfo is None:
+                    midnight_candidate = dt_util.as_local(midnight_candidate)
+            self.async_schedule_future_update(dt_util.as_utc(midnight_candidate))  # Convert to UTC
         return data
