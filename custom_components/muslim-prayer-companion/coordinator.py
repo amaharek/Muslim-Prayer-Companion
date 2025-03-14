@@ -11,6 +11,7 @@ import requests
 
 from prayer_times_calculator import PrayerTimesCalculator, exceptions
 from requests.exceptions import ConnectionError as ConnError
+from homeassistant.util.dt import get_time_zone, make_aware
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import CALLBACK_TYPE, HomeAssistant, callback
@@ -364,6 +365,7 @@ class MuslimPrayerCompanionDataUpdateCoordinator(DataUpdateCoordinator[dict[str,
         # For each prayer time string, determine if the time has already passed; if so, use tomorrow’s date.
         for prayer, time_str in raw_prayer_times.items():
             try:
+                LOGGER.info(f"Prayer: {prayer}, Time: {time_str} Today: {today}")
                 candidate = dt_util.parse_datetime(f"{today} {time_str}")
                 if candidate.tzinfo is None:
                     candidate = dt_util.as_local(candidate)
