@@ -85,12 +85,24 @@ class MuslimPrayerCompanionTimeSensor(
         if value is None:
             _LOGGER.error("No value found for %s", self.entity_description.key)
             return None
+
         if self.entity_description.device_class == SensorDeviceClass.TIMESTAMP:
             try:
-                return parse_datetime(value)
+                # Ensure value is a datetime object
+                if isinstance(value, datetime):
+                    return value  # Home Assistant handles datetime correctly
+
+                # If it's a string, parse it
+                elif isinstance(value, str):
+                    return parse_datetime(value)
+
+                else:
+                    _LOGGER.error("Unexpected type for %s: %s", self.entity_description.key, type(value))
+                    return None
             except Exception as e:
                 _LOGGER.error("Error parsing datetime for %s: %s", self.entity_description.key, e)
                 return None
+
         return value
 
     @property
