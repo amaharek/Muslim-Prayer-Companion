@@ -364,18 +364,15 @@ class MuslimPrayerCompanionDataUpdateCoordinator(DataUpdateCoordinator[dict[str,
         # For each prayer time string, determine if the time has already passed; if so, use tomorrow’s date.
         for prayer, time_str in raw_prayer_times.items():
             try:
-                LOGGER.info(f"{today} {time_str}")
-                LOGGER.info(f"Prayer: {prayer}, Time: {time_str}")
-                LOGGER.info(f"Today: {today}, Now: {now}") 
-                LOGGER.info(f"Candidate: ")
-                LOGGER.info(f"now: {now}")
-                LOGGER.debug("Type of time_str = %s, value = %s", type(time_str), time_str)
-                candidate = dt_util.as_local(time_str)
-                LOGGER.info(f"candidate: {candidate}")
-                if candidate < now:
-                    candidate += timedelta(days=1)
-                # Ensure conversion to UTC if using calculated (local) times.
-                prayer_times_dt[prayer] = dt_util.as_utc(candidate)
+                # candidate = dt_util.parse_datetime(f"{today} {time_str}")
+                # LOGGER.info(f"candidate: {candidate}")
+                # candidate = dt_util.as_local(candidate) 
+                # LOGGER.info(f"candidate: {candidate}")
+                # if candidate < now:
+                #     candidate = dt_util.parse_datetime(f"{today + timedelta(days=1)} {time_str}")
+
+                if candidate:=dt_util.parse_datetime(f"{dt_util.now().date()} {time_str}"):
+                    prayer_times_dt[prayer] = dt_util.as_utc(candidate)
             except Exception as e:
                 LOGGER.error(f"Error parsing prayer time for {prayer}: {e}")
 
