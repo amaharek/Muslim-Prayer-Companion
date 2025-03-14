@@ -9,6 +9,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from homeassistant.util.dt import parse_datetime
 
 from . import MuslimPrayerCompanionDataUpdateCoordinator
 from .const import DOMAIN, NAME
@@ -80,9 +81,16 @@ class MuslimPrayerCompanionTimeSensor(
     @property
     def native_value(self):
         """Return the state of the sensor."""
-        value = self.coordinator.data.get(self.entity_description.key, "23:59")
-        if value == "23:59":
+        value = self.coordinator.data.get(self.entity_description.key)
+        if value is None:
             _LOGGER.error("No value found for %s", self.entity_description.key)
+            return None
+        if self.entity_description.device_class == SensorDeviceClass.TIMESTAMP:
+            try:
+                return parse_datetime(value)
+            except Exception as e:
+                _LOGGER.error("Error parsing datetime for %s: %s", self.entity_description.key, e)
+                return None
         return value
 
     @property
