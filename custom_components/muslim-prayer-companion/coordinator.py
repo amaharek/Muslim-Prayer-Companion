@@ -398,8 +398,8 @@ class MuslimPrayerCompanionDataUpdateCoordinator(DataUpdateCoordinator[dict[str,
 
         # Schedule the next update at midnight.
         if "Midnight" in raw_prayer_times:
-            midnight_candidate = dt_util.parse_datetime(f"{today} {raw_prayer_times['Midnight']}")
+            midnight_candidate = dt_util.as_utc(dt_util.parse_datetime(f"{today} {raw_prayer_times['Midnight']}"))
             if midnight_candidate < now:
-                midnight_candidate = dt_util.parse_datetime(f"{today + timedelta(days=1)} {raw_prayer_times['Midnight']}")
-            self.async_schedule_future_update(dt_util.as_utc(midnight_candidate))
+                midnight_candidate = dt_util.as_utc(dt_util.parse_datetime(f"{today + timedelta(days=1)} {raw_prayer_times['Midnight']}"))
+            self.async_schedule_future_update(midnight_candidate)
         return data
