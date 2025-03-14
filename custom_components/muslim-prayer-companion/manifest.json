@@ -6,7 +6,7 @@
   "issue_tracker": "https://github.com/amaharek/muslim-prayer-companion/issues",
   "documentation": "https://github.com/amaharek/muslim-prayer-companion",
   "iot_class": "cloud_polling",
-  "version": "2.1.15",
+  "version": "2.2.0",
   "requirements": ["prayer-times-calculator==0.0.12", "hijri-converter==2.3.1"], 
   "icon": "mdi:mosque-outline"
 }
