@@ -4,7 +4,7 @@ Muslim Prayer Companion Coordinator
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import json
 import logging
 import requests
@@ -18,11 +18,22 @@ from homeassistant.helpers.event import async_call_later, async_track_point_in_t
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 import homeassistant.util.dt as dt_util
 
-from .const import CONF_CALC_METHOD, DEFAULT_CALC_METHOD
-from .const import DOMAIN, LOGGER
+from .const import (
+    CONF_CALC_METHOD,
+    CONF_IQAMAH_METHOD,
+    CONF_IQAMAH_OFFSETS,
+    DEFAULT_CALC_METHOD,
+    DEFAULT_IQAMAH_METHOD,
+    DEFAULT_IQAMAH_OFFSETS,
+    DOMAIN,
+    LOGGER,
+)
 
+import async_timeout
 
-def format_time(time_list, offset):
+# --- Utility functions ---
+
+def format_time(time_list: list[int], offset: int = 0) -> str:
     """
     Convert a list of hour/minutes of a prayer to time in format HH:MM.
 
@@ -33,10 +44,11 @@ def format_time(time_list, offset):
     Returns:
         str: Time in format HH:MM
     """
-    return f"{str(time_list[0] + offset).zfill(2)}:{str(time_list[1]).zfill(2)}"
+    hour = time_list[0] + offset
+    return f"{str(hour % 24).zfill(2)}:{str(time_list[1]).zfill(2)}"
 
 
-def get_time_list(str_time):
+def get_time_list(str_time: str) -> list[int]:
     """
     Convert time string in format HH:MM to time list [hour, minute].
 
@@ -49,7 +61,7 @@ def get_time_list(str_time):
     return [int(num) for num in str_time.split(":")]
 
 
-def get_standard_sunset_midnight(latitude, longitude, calculation_method):
+def get_standard_sunset_midnight(latitude: float, longitude: float, calculation_method: str):
     """
     Return Maghrib time & Midnight time for given latitude, longitude & calculation method.
 
@@ -63,23 +75,23 @@ def get_standard_sunset_midnight(latitude, longitude, calculation_method):
     """
     midnight = "00:00"
     maghrib = ""
+    std_prayers = {}
     try:
         calc = PrayerTimesCalculator(
             latitude=latitude,
             longitude=longitude,
             calculation_method="isna",
-            date=str(dt_util.now().date()),
+            date=str(date.today()),
         )
         std_prayers = calc.fetch_prayer_times()
-        midnight = std_prayers["Midnight"]
-        maghrib = std_prayers["Maghrib"]
+        midnight = std_prayers.get("Midnight", "00:00")
+        maghrib = std_prayers.get("Maghrib", "")
     except Exception as e:
-        LOGGER.info(
-            f"Failed to extract midnight/maghrib from ISNA calculation: {e}")
+        LOGGER.info(f"Failed to extract midnight/maghrib from ISNA calculation: {e}")
     return maghrib, midnight, std_prayers
 
 
-def get_json_response(url):
+def get_json_response(url: str):
     """
     Return JSON response from HTTP request.
 
@@ -90,17 +102,17 @@ def get_json_response(url):
         dict: JSON response
     """
     try:
-        resp = requests.get(url=url)
+        resp = requests.get(url=url, timeout=10)
         if resp.status_code == requests.codes.ok:
             return resp.json()
         else:
-            LOGGER.debug(f"{url} : request failed")
+            LOGGER.debug(f"{url} : request failed with status code {resp.status_code}")
     except Exception as e:
         LOGGER.info(f"{url} : request exception raised, got error: {e}")
     return None
 
 
-def get_hour_offset_fix(non_standard_str, standard_str):
+def get_hour_offset_fix(non_standard_str: str, standard_str: str) -> int:
     """
     Compare the prayer between the standard and non-standard one, and give the fix offset for the broken week at the start and end of the DST.
 
@@ -118,12 +130,13 @@ def get_hour_offset_fix(non_standard_str, standard_str):
         LOGGER.info(f"Failed to parse time expecting HH:MM format: {e}")
         return 0
 
-    delta = (non_standard - standard).seconds if non_standard > standard else (
-        standard - non_standard).seconds
-    return -1 if delta > 900 and non_standard > standard else 1 if delta > 900 else 0
+    delta = (non_standard - standard).seconds if non_standard > standard else (standard - non_standard).seconds
+    if delta > 900:
+        return -1 if non_standard > standard else 1
+    return 0
 
 
-def get_prayers_by_wp_plugin(url, name, standard_maghrib, midnight):
+def get_prayers_by_wp_plugin(url: str, name: str, standard_maghrib: str, midnight: str):
     """
     Get the prayers from a WordPress site with the Daily Prayer Time plugin.
 
@@ -140,8 +153,7 @@ def get_prayers_by_wp_plugin(url, name, standard_maghrib, midnight):
     if json_resp:
         try:
             wp_prayers = json_resp[0]
-            hr_offset = get_hour_offset_fix(
-                wp_prayers["maghrib_begins"][0:5], standard_maghrib)
+            hr_offset = get_hour_offset_fix(wp_prayers["maghrib_begins"][0:5], standard_maghrib)
             prayer_times_info = {
                 "Fajr": format_time(get_time_list(wp_prayers["fajr_begins"][0:5]), hr_offset),
                 "Sunrise": format_time(get_time_list(wp_prayers["sunrise"][0:5]), hr_offset),
@@ -155,18 +167,18 @@ def get_prayers_by_wp_plugin(url, name, standard_maghrib, midnight):
             }
             return prayer_times_info
         except Exception as e:
-            LOGGER.info(
-                f"Failed to retrieve prayer from {name}, failed to parse prayers from JSON: {e}")
+            LOGGER.info(f"Failed to retrieve prayer from {name}, JSON parse error: {e}")
     return None
 
+# --- Coordinator Class ---
 
-class MuslimPrayerCompanionDataUpdateCoordinator(DataUpdateCoordinator[dict[str, datetime]]):
-    """Islamic Prayer Client Object."""
+class MuslimPrayerCompanionDataUpdateCoordinator(DataUpdateCoordinator[dict[str, any]]):
+    """Muslim Prayer Companion Data Update Coordinator."""
 
     config_entry: ConfigEntry
 
     def __init__(self, hass: HomeAssistant) -> None:
-        """Initialize the Muslim Prayer client."""
+        """Initialize the coordinator."""
         self.event_unsub: CALLBACK_TYPE | None = None
         super().__init__(
             hass=hass,
@@ -180,71 +192,50 @@ class MuslimPrayerCompanionDataUpdateCoordinator(DataUpdateCoordinator[dict[str,
         """Return the calculation method."""
         return self.config_entry.options.get(CONF_CALC_METHOD, DEFAULT_CALC_METHOD)
 
+    @property
+    def iqamah_method(self) -> str:
+        """Return the iqamah method."""
+        return self.config_entry.options.get(CONF_IQAMAH_METHOD, DEFAULT_IQAMAH_METHOD)
+
     def get_hijri_date(self) -> dict[str, str]:
         """Fetch Hijri date."""
         calc = PrayerTimesCalculator(
             latitude=self.hass.config.latitude,
             longitude=self.hass.config.longitude,
             calculation_method="isna",
-            date=str(dt_util.now().date()),
+            date=str(date.today()),
         )
-
-        hijri_date = calc["data"]["hijri"]["date"] # DD-MM-YYYY
-        hijri_day = calc["data"]["hijri"]["day"]
-        hijri_month_num = calc["data"]["hijri"]["month"]["number"]
-        hijri_month_readable = calc["data"]["hijri"]["month"]["en"]
-        hijri_year = calc["data"]["hijri"]["year"] 
+        hijri_data = calc.fetch_prayer_times().get("date")
+        hijri_date = hijri_data["hijri"]["date"]  # DD-MM-YYYY
+        hijri_day = hijri_data["hijri"]["day"]
+        hijri_month_num = hijri_data["hijri"]["month"]["number"]
+        hijri_month_readable = hijri_data["hijri"]["month"]["en"]
+        hijri_year = hijri_data["hijri"]["year"]
         hijri_day_month_readable = f"{hijri_day}-{hijri_month_readable}"
         hijri_date_readable = f"{hijri_day}-{hijri_month_readable}-{hijri_year}"
-        
-        data = {
-            'hijri_date': hijri_date,
-            'hijri_day': hijri_day,
-            'hijri_month_num': hijri_month_num,
-            'hijri_month_readable': hijri_month_readable,
-            'hijri_year': hijri_year,
-            'hijri_date_readable': hijri_date_readable,
-            'hijri_day_month_readable': hijri_day_month_readable
+
+        return {
+            "hijri_date": hijri_date,
+            "hijri_day": hijri_day,
+            "hijri_month_num": hijri_month_num,
+            "hijri_month_readable": hijri_month_readable,
+            "hijri_year": hijri_year,
+            "hijri_date_readable": hijri_date_readable,
+            "hijri_day_month_readable": hijri_day_month_readable,
         }
 
-        return data
+    def _get_prayer_times_standard(self, target_date: date) -> dict[str, str]:
+        """Fetch prayer times for standard calculation methods on target_date."""
+        calc = PrayerTimesCalculator(
+            latitude=self.hass.config.latitude,
+            longitude=self.hass.config.longitude,
+            calculation_method="isna",
+            date=str(target_date),
+        )
+        return calc.fetch_prayer_times()
 
-    def get_new_prayer_times(self) -> dict[str, str]:
-        """Fetch prayer times for today."""
-        calc_method = self.calc_method
-        LOGGER.debug(calc_method)
-
-        calculated_prayer_time = self._get_prayer_times_standard()
-
-        if calc_method == "ie-icci":
-            prayer_times = self._get_prayer_times_ie_icci()
-        elif calc_method in ["ie-mcnd", "ie-hicc"]:
-            prayer_times = self._get_prayer_times_wp_plugin(calc_method)
-        else:
-            prayer_times = calculated_prayer_time
-
-        hijri_date = calculated_prayer_time['date']['hijri']['date'] # DD-MM-YYYY
-        hijri_day = calculated_prayer_time['date']['hijri']['day']
-        hijri_month_num = calculated_prayer_time['date']['hijri']['month']['number']
-        hijri_month_readable = calculated_prayer_time['date']['hijri']['month']['en']
-        hijri_year = calculated_prayer_time['date']['hijri']['year'] 
-        hijri_day_month_readable = f"{hijri_day}-{hijri_month_readable}"
-        hijri_date_readable = f"{hijri_day}-{hijri_month_readable}-{hijri_year}"
-
-        data = {**prayer_times}
-        data['hijri_date'] = hijri_date
-        data['hijri_day'] = hijri_day
-        data['hijri_month_num'] = hijri_month_num
-        data['hijri_month_readable'] = hijri_month_readable
-        data['hijri_year'] = hijri_year
-        data['hijri_date_readable'] = hijri_date_readable
-        data['hijri_day_month_readable'] = hijri_day_month_readable 
-        
-
-        return data
-
-    def _get_prayer_times_ie_icci(self) -> dict[str, str]:
-        """Fetch prayer times for 'ie-icci' calculation method."""
+    def _get_prayer_times_ie_icci(self, target_date: date) -> dict[str, str]:
+        """Fetch prayer times for 'ie-icci' method on target_date."""
         st_maghrib, midnight, isna_prayers = get_standard_sunset_midnight(
             self.hass.config.latitude, self.hass.config.longitude, "isna"
         )
@@ -252,21 +243,11 @@ class MuslimPrayerCompanionDataUpdateCoordinator(DataUpdateCoordinator[dict[str,
         json_resp = get_json_response(url)
         if json_resp:
             try:
-                current_month = datetime.today().strftime("%-m")
-                LOGGER.info(f"Current month: {current_month}")
-
-                current_day = datetime.today().strftime("%-d")
-                LOGGER.info(f"Current day: {current_day}")
-
+                current_month = target_date.strftime("%-m")
+                current_day = target_date.strftime("%-d")
                 prayers = json_resp["timetable"][current_month][current_day]
-                LOGGER.info(f"Prayers: {prayers}")
-
                 icci_maghrib = format_time(prayers[4], 0)
-                LOGGER.info(f"ICCI Maghrib: {icci_maghrib}")
-
                 hr_offset = get_hour_offset_fix(icci_maghrib, st_maghrib)
-                LOGGER.info(f"Hour offset: {hr_offset}")
-
                 prayer_times_info = {
                     "Fajr": format_time(prayers[0], hr_offset),
                     "Sunrise": format_time(prayers[1], hr_offset),
@@ -278,18 +259,16 @@ class MuslimPrayerCompanionDataUpdateCoordinator(DataUpdateCoordinator[dict[str,
                     "Imsak": format_time(prayers[4], hr_offset),
                     "Midnight": midnight,
                 }
-                LOGGER.info(f"Prayer times info: {prayer_times_info}")
-                
                 return prayer_times_info
             except Exception as e:
-                LOGGER.info(f"Failed to retrieve prayer from ICCI, failed to parse prayers from JSON: {e}")
+                LOGGER.info(f"ICCI API parse error: {e}")
                 return isna_prayers
         else:
-            LOGGER.info("Failed to retrieve prayer from ICCI, JSON response is None.")
+            LOGGER.info("ICCI API JSON response is None.")
             return isna_prayers
 
-    def _get_prayer_times_wp_plugin(self, calc_method: str) -> dict[str, str]:
-        """Fetch prayer times for WordPress plugin calculation methods."""
+    def _get_prayer_times_wp_plugin(self, calc_method: str, target_date: date) -> dict[str, str]:
+        """Fetch prayer times for WordPress plugin calculation methods on target_date."""
         st_maghrib, midnight, isna_prayers = get_standard_sunset_midnight(
             self.hass.config.latitude, self.hass.config.longitude, "isna"
         )
@@ -297,59 +276,142 @@ class MuslimPrayerCompanionDataUpdateCoordinator(DataUpdateCoordinator[dict[str,
         prayer_times_info = get_prayers_by_wp_plugin(url, calc_method, st_maghrib, midnight)
         return prayer_times_info if prayer_times_info else isna_prayers
 
-    def _get_prayer_times_standard(self) -> dict[str, str]:
-        """Fetch prayer times for standard calculation methods."""
-        calc = PrayerTimesCalculator(
-            latitude=self.hass.config.latitude,
-            longitude=self.hass.config.longitude,
-            calculation_method="isna",
-            date=str(dt_util.now().date()),
-        )
-        return calc.fetch_prayer_times()
+    def get_new_prayer_times(self) -> dict[str, str]:
+        """Fetch prayer times for the target date using the configured calculation method.
 
+        To support showing the next occurrence if a prayer time has passed,
+        we compute for today and adjust by adding one day when needed.
+        """
+        target_date = date.today()
+        calc_method = self.calc_method
+        if calc_method == "ie-icci":
+            prayer_times = self._get_prayer_times_ie_icci(target_date)
+        elif calc_method in ["ie-mcnd", "ie-hicc"]:
+            prayer_times = self._get_prayer_times_wp_plugin(calc_method, target_date)
+        else:
+            prayer_times = self._get_prayer_times_standard(target_date)
+        return prayer_times
+
+    def _get_iqamah_times_offset(self, prayer_times_dt: dict[str, datetime]) -> dict[str, datetime]:
+        """Compute iqamah times using offset values from configuration."""
+        iqamah_offsets = self.config_entry.options.get(CONF_IQAMAH_OFFSETS, DEFAULT_IQAMAH_OFFSETS)
+        iqamah = {}
+        for prayer in ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"]:
+            base_dt = prayer_times_dt.get(prayer)
+            if base_dt:
+                # Assume the offset is given in minutes and apply to the local time.
+                local_time = dt_util.as_local(base_dt)
+                local_iqamah = local_time + timedelta(minutes=iqamah_offsets.get(prayer, 0))
+                iqamah[f"iqamah_{prayer}"] = dt_util.as_utc(local_iqamah)
+        return iqamah
+
+    def _get_iqamah_times_api(self) -> dict[str, datetime]:
+        """Fetch iqamah times from an external API (placeholder implementation)."""
+        # For example, use a custom API endpoint if provided.
+        custom_api = self.config_entry.options.get("custom_iqamah_api")
+        iqamah = {}
+        if custom_api:
+            json_resp = get_json_response(custom_api)
+            if json_resp:
+                try:
+                    # Assume API returns times in HH:MM for each prayer.
+                    for prayer in ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"]:
+                        time_str = json_resp.get(prayer)
+                        if time_str:
+                            # Convert time_str to datetime (adjusting date if needed)
+                            local_dt = dt_util.parse_datetime(f"{date.today()} {time_str}")
+                            if local_dt < dt_util.now():
+                                local_dt = dt_util.parse_datetime(f"{date.today() + timedelta(days=1)} {time_str}")
+                            iqamah[f"iqamah_{prayer}"] = dt_util.as_utc(local_dt)
+                except Exception as e:
+                    LOGGER.error(f"Error parsing IQamah API response: {e}")
+        return iqamah
+    
     @callback
     def async_schedule_future_update(self, midnight_dt: datetime) -> None:
         """
-        Schedule future update for sensors.
-
-        Midnight is a calculated time. The specifics of the calculation depend on the method of the prayer time calculation.
-        This calculated midnight is the time at which the time to pray the Isha prayers have expired.
-
-        Args:
-            midnight_dt (datetime): Calculated midnight time
+        Schedule the next update after midnight.
         """
         LOGGER.debug("Scheduling next update for Muslim Prayer Companion")
-
         now = dt_util.utcnow()
-        next_update_at = midnight_dt + \
-            timedelta(days=1, minutes=1) if now > midnight_dt else dt_util.start_of_local_day(
-                now + timedelta(days=1))
-
+        next_update_at = (
+            midnight_dt + timedelta(days=1, minutes=1)
+            if now > midnight_dt
+            else dt_util.start_of_local_day(now + timedelta(days=1))
+        )
         LOGGER.debug(f"Next update scheduled for: {next_update_at}")
-
         self.event_unsub = async_track_point_in_time(
             self.hass, self.async_request_update, next_update_at
         )
 
     async def async_request_update(self, *_) -> None:
-        """Request update from coordinator."""
+        """Request an update from the coordinator."""
         await self.async_request_refresh()
 
-    async def _async_update_data(self) -> dict[str, datetime]:
-        """Update sensors with new prayer times."""
+    async def _async_update_data(self) -> dict[str, any]:
+        """Update sensors with new prayer, iqamah and hijri date data."""
+        now = dt_util.as_local(dt_util.now())
+        today = date.today()
         try:
-            prayer_times = await self.hass.async_add_executor_job(self.get_new_prayer_times)
+            # Fetch prayer times (for today; will adjust if passed)
+            raw_prayer_times = await self.hass.async_add_executor_job(self.get_new_prayer_times)
             hijri_date = await self.hass.async_add_executor_job(self.get_hijri_date)
-
         except (exceptions.InvalidResponseError, ConnError) as err:
             async_call_later(self.hass, 60, self.async_request_update)
             raise UpdateFailed from err
 
+        prayer_times_dt: dict[str, datetime] = {}
+        # For each prayer time string, determine if the time has already passed; if so, use tomorrow’s date.
+        for prayer, time_str in raw_prayer_times.items():
+            try:
+                if isinstance(time_str, str):
+                    candidate = datetime.strptime(time_str, "%H:%M")
+                    candidate = candidate.replace(
+                        year=today.year, month=today.month, day=today.day
+                    )
+                    candidate = dt_util.as_local(candidate)  # Convert to local time
 
-        prayer_times_info = {prayer: dt_util.as_utc(dt_util.parse_datetime(
-            f"{dt_util.now().date()} {time}")) for prayer, time in prayer_times.items()}
-        hijri_date_info = {key: value for key, value in hijri_date.items()}
-        
+                    if candidate < now:
+                        candidate = candidate + timedelta(days=1)  # Move to next day if needed
 
-        self.async_schedule_future_update(prayer_times_info["Midnight"])
-        return {**prayer_times_info, **hijri_date_info}
+                    prayer_times_dt[prayer] = dt_util.as_utc(candidate)  # Convert to UTC-aware
+                else:
+                    LOGGER.error(f"Error parsing prayer time for {prayer}: time_str is not a string")
+            except Exception as e:
+                LOGGER.error(f"Error parsing prayer time for {prayer}: {e}")
+
+        # Compute IQamah times based on the selected method.
+        if self.iqamah_method == "offset":
+            iqamah_times = self._get_iqamah_times_offset(prayer_times_dt)
+        else:
+            iqamah_times = self._get_iqamah_times_api()
+
+        # Determine the next prayer (consider only standard prayer names).
+        next_prayer_name = None
+        next_prayer_time = None
+        for prayer in ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"]:
+            prayer_time = prayer_times_dt.get(prayer)
+            if prayer_time and prayer_time > now:
+                if next_prayer_time is None or prayer_time < next_prayer_time:
+                    next_prayer_time = prayer_time
+                    next_prayer_name = prayer
+
+        data: dict[str, any] = {}
+        data.update(prayer_times_dt)
+        data.update(iqamah_times)
+        data.update(hijri_date)
+        if next_prayer_time:
+            data["next_prayer"] = next_prayer_time
+            data["next_prayer_name"] = next_prayer_name
+
+        # Schedule the next update at midnight.
+        if "Midnight" in raw_prayer_times:
+            midnight_candidate = dt_util.parse_datetime(f"{today} {raw_prayer_times['Midnight']}")
+            if midnight_candidate and midnight_candidate.tzinfo is None:
+                midnight_candidate = dt_util.as_local(midnight_candidate)
+            if midnight_candidate < now:
+                midnight_candidate = dt_util.parse_datetime(f"{today + timedelta(days=1)} {raw_prayer_times['Midnight']}")
+                if midnight_candidate and midnight_candidate.tzinfo is None:
+                    midnight_candidate = dt_util.as_local(midnight_candidate)
+            self.async_schedule_future_update(dt_util.as_utc(midnight_candidate))  # Convert to UTC
+        return data

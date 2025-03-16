@@ -1,4 +1,4 @@
-# Muslim-Prayer-Companion
+# Muslim Companion
 
 [![GitHub Release][releases-shield]][releases]
 [![GitHub Activity][commits-shield]][commits]
@@ -17,13 +17,7 @@ Platform | Description
 
 ## Installation
 
-1. Using the tool of choice open the directory (folder) for your HA configuration (where you find `configuration.yaml`).
-1. If you do not have a `custom_components` directory (folder) there, you need to create it.
-1. In the `custom_components` directory (folder) create a new folder called `muslim-prayer-companion`.
-1. Download _all_ the files from the `custom_components/muslim-prayer-companion/` directory (folder) in this repository.
-1. Place the files you downloaded in the new directory (folder) you created.
-1. Restart Home Assistant.
-1. In the HA UI go to "Configuration" -> "Integrations" click "+" and search for "Muslim Prayer Companion".
+Using HACS add the repo, go to settings, integrations, add "Muslim prayer companion" choose calc method 
 
 ## Configuration is done in the UI
 
@@ -33,11 +27,11 @@ If you want to contribute to this please read the [Contribution guidelines](CONT
 
 ***
 
-[muslim-prayer-companion]: https://github.com/amaharek/Muslim-Prayer-Companion
+[muslim-prayer-companion]: https://github.com/amaharek/muslim-prayer-companion
 [buymecoffee]: https://www.buymeacoffee.com/amaharek
 [buymecoffeebadge]: https://img.shields.io/badge/buy%20me%20a%20coffee-donate-yellow.svg?style=for-the-badge
-[commits-shield]: https://img.shields.io/github/commit-activity/y/amaharek/Muslim-Prayer-Companion.svg?style=for-the-badge
-[commits]: https://github.com/amaharek/Muslim-Prayer-Companion/commits/main
-[license-shield]: https://img.shields.io/github/license/amaharek/Muslim-Prayer-Companion.svg?style=for-the-badge
-[releases-shield]: https://img.shields.io/github/release/amaharek/Muslim-Prayer-Companion.svg?style=for-the-badge
-[releases]: https://github.com/amaharek/Muslim-Prayer-Companion/releases
+[commits-shield]: https://img.shields.io/github/commit-activity/y/amaharek/muslim-prayer-companion.svg?style=for-the-badge
+[commits]: https://github.com/amaharek/muslim-prayer-companion/commits/main
+[license-shield]: https://img.shields.io/github/license/amaharek/muslim-prayer-companion.svg?style=for-the-badge
+[releases-shield]: https://img.shields.io/github/release/amaharek/muslim-prayer-companion.svg?style=for-the-badge
+[releases]: https://github.com/amaharek/muslim-prayer-companion/releases
