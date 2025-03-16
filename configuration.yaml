@@ -1,0 +1,169 @@
+sensor:
+  - platform: template
+    sensors:
+      is_ramadan:
+        friendly_name: "Is it Ramadan?"
+        value_template: >-
+          {% if 'Ramaḍān' in states('sensor.muslim_prayer_companion.hijri_month') %}
+            true
+          {% else %}
+            false
+          {% endif %}
+        icon_template: mdi:skip-next-circle
+
+  - platform: template
+    sensors:
+      hijri_calendar:
+        friendly_name: "{{states('sensor.hijri_year')}}"
+        value_template: >
+          {{states('sensor.hijri_day')}} - {{states('sensor.hijri_month')}}
+        icon_template: mdi:star-crescent
+
+      next_prayer:
+        friendly_name: "Next Prayer"
+        value_template: >
+          {% set s_list = {'sensor.muslim_prayer_companion_fajr_prayer': 'Fajr', 
+          'sensor.muslim_prayer_companion_dhuhr_prayer': 'Dhuhr', 
+          'sensor.muslim_prayer_companion_asr_prayer': 'Asr', 
+          'sensor.muslim_prayer_companion_maghrib_prayer': 'Maghrib', 
+          'sensor.muslim_prayer_companion_isha_prayer': 'Isha'} %}
+
+          {% set local_time = now().timestamp() %}
+          {% set upcoming_events = expand(s_list.keys() | select('has_value')) 
+          | selectattr('state', 'ge', (local_time)|timestamp_custom('%Y-%m-%dT%H:%M:%S', False))
+          | list %}
+
+          {% if upcoming_events %}
+            {% set first = upcoming_events | sort(attribute='state') | first %}
+            {% set time_difference = (as_timestamp(first.state) - local_time) / 60 %}
+            {% if time_difference < 60 %}
+              {{ s_list[first.entity_id] }} in {{ time_difference | round(0) }} minutes
+            {% elif time_difference_minutes == 1 %}
+                  1 minute
+            {% else %}
+              {{ as_timestamp(first.state) | timestamp_custom('%H:%M') }} ({{ s_list[first.entity_id] }})
+            {% endif %}
+          {% else %}
+            No upcoming prayer
+          {% endif %}
+        icon_template: mdi:skip-next-circle
+
+rest:
+  - resource: http://api.aladhan.com/timingsByCity?city=yourcity&country=Netherlands&method=3
+    scan_interval: 43200
+    sensor:
+      - name: "Imsak"
+        unique_id: imsak
+        value_template: >
+          {% set time_str = value_json['data']['timings']['Imsak'] %}
+          {% set date_time_str = now().date().isoformat() + ' ' + time_str %}
+          {% set amsterdam_tz = 'Europe/Amsterdam' %}
+          {% set amsterdam_time = as_timestamp(strptime(date_time_str, '%Y-%m-%d %H:%M')) | timestamp_custom('%Y-%m-%dT%H:%M:%S+02:00', amsterdam_tz) %}
+          {{ amsterdam_time }}
+        device_class: timestamp
+        icon: mdi:mosque
+      - name: "Imsak_readable"
+        unique_id: imsak_readable
+        value_template: "{{ as_timestamp(today_at(value_json['data']['timings']['Imsak'])) | timestamp_custom('%H:%M') }}"
+        icon: mdi:mosque
+
+      - name: "Fajr"
+        unique_id: fajr
+        value_template: >
+          {% set time_str = value_json['data']['timings']['Fajr'] %}
+          {% set date_time_str = now().date().isoformat() + ' ' + time_str %}
+          {% set amsterdam_tz = 'Europe/Amsterdam' %}
+          {% set amsterdam_time = as_timestamp(strptime(date_time_str, '%Y-%m-%d %H:%M')) | timestamp_custom('%Y-%m-%dT%H:%M:%S+01:00', amsterdam_tz) %}
+          {{ amsterdam_time }}
+        device_class: timestamp
+        icon: mdi:mosque
+      - name: "Fajr Readable"
+        unique_id: fajr_readable
+        value_template: "{{ as_timestamp(today_at(value_json['data']['timings']['Fajr'])) | timestamp_custom('%H:%M') }}"
+        icon: mdi:mosque
+
+      - name: "Dhuhr"
+        unique_id: dhuhr
+        value_template: >
+          {% set time_str = value_json['data']['timings']['Dhuhr'] %}
+          {% set date_time_str = now().date().isoformat() + ' ' + time_str %}
+          {% set amsterdam_time = as_timestamp(strptime(date_time_str, '%Y-%m-%d %H:%M')) | timestamp_custom('%Y-%m-%dT%H:%M:%S+01:00', 'Europe/Amsterdam') %}
+          {{ amsterdam_time }}
+        device_class: timestamp
+        icon: mdi:mosque
+      - name: "Dhuhr Readable"
+        unique_id: dhuhr_readable
+        value_template: "{{ as_timestamp(today_at(value_json['data']['timings']['Dhuhr'])) | timestamp_custom('%H:%M') }}"
+        icon: mdi:mosque
+
+      - name: "Asr"
+        unique_id: asr
+        value_template: >
+          {% set time_str = value_json['data']['timings']['Asr'] %}
+          {% set date_time_str = now().date().isoformat() + ' ' + time_str %}
+          {% set amsterdam_time = as_timestamp(strptime(date_time_str, '%Y-%m-%d %H:%M')) | timestamp_custom('%Y-%m-%dT%H:%M:%S+01:00', 'Europe/Amsterdam') %}
+          {{ amsterdam_time }}
+        device_class: timestamp
+        icon: mdi:mosque
+      - name: "Asr Readable"
+        unique_id: asr_readable
+        value_template: "{{ as_timestamp(today_at(value_json['data']['timings']['Asr'])) | timestamp_custom('%H:%M') }}"
+        icon: mdi:mosque
+
+      - name: "Maghrib"
+        unique_id: maghrib
+        value_template: >
+          {% set time_str = value_json['data']['timings']['Maghrib'] %}
+          {% set date_time_str = now().date().isoformat() + ' ' + time_str %}
+          {% set amsterdam_tz = 'Europe/Amsterdam' %}
+          {% set amsterdam_time = as_timestamp(strptime(date_time_str, '%Y-%m-%d %H:%M')) | timestamp_custom('%Y-%m-%dT%H:%M:%S+01:00', amsterdam_tz) %}
+          {{ amsterdam_time }}
+        device_class: timestamp
+        icon: mdi:mosque
+      - name: "Maghrib Readable"
+        unique_id: maghrib_readable
+        value_template: "{{ as_timestamp(today_at(value_json['data']['timings']['Maghrib'])) | timestamp_custom('%H:%M') }}"
+        icon: mdi:mosque
+
+      - name: "Isha"
+        unique_id: isha
+        value_template: >
+          {% set time_str = value_json['data']['timings']['Isha'] %}
+          {% set date_time_str = now().date().isoformat() + ' ' + time_str %}
+          {% set amsterdam_tz = 'Europe/Amsterdam' %}
+          {% set amsterdam_time = as_timestamp(strptime(date_time_str, '%Y-%m-%d %H:%M')) | timestamp_custom('%Y-%m-%dT%H:%M:%S+01:00', amsterdam_tz) %}
+          {{ amsterdam_time }}
+        device_class: timestamp
+        icon: mdi:mosque
+
+      - name: "Isha Readable"
+        unique_id: isha_readable
+        value_template: "{{ as_timestamp(today_at(value_json['data']['timings']['Isha'])) | timestamp_custom('%H:%M') }}"
+        icon: mdi:mosque
+
+      - name: "Hijri Date"
+        unique_id: hijri
+        value_template: "{{ value_json['data']['date']['hijri']['date'] }}"
+        icon: mdi:mosque
+      - name: "Hijri day"
+        unique_id: hijri_day
+        value_template: "{{ value_json['data']['date']['hijri']['day'] }}"
+        icon: mdi:mosque
+      - name: "Hijri Month"
+        unique_id: hijri_month
+        value_template: "{{ value_json['data']['date']['hijri']['month']['en'] }}"
+        icon: mdi:mosque
+      - name: "Hijri Year"
+        unique_id: hijri_year
+        value_template: "{{ value_json['data']['date']['hijri']['year'] }}"
+        icon: mdi:mosque
+
+      - name: "Islamic Holiday"
+        unique_id: islamic_holiday
+        value_template: >
+          {% if value_json['data']['date']['hijri']['holidays'] %}
+            ({{ value_json['data']['date']['hijri']['holidays'] | replace('[', '') | replace(']', '') | replace("'", '') }})
+          {% else %}
+            False
+          {% endif %}
+        icon: mdi:star-crescent
