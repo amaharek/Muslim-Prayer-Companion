@@ -2,8 +2,8 @@
 Constants for the Muslim Prayer Companion component.
 """
 
-from typing import Final
 from logging import getLogger
+from typing import Final
 
 DOMAIN: Final = "muslim-prayer-companion"
 NAME: Final = "Muslim Prayer Companion"
@@ -13,15 +13,9 @@ CONF_CALC_METHOD: Final = "calculation_method"
 CONF_USE_API: Final = "use_api"  # Option to choose API-based prayer times.
 CONF_API_KEY: Final = "api_key"  # API key if required.
 CONF_IQAMAH_OFFSETS: Final = "iqamah_offsets"  # Offsets (in minutes) for Iqamah times.
-DEFAULT_IQAMAH_METHOD: Final = "offset" 
+DEFAULT_IQAMAH_METHOD: Final = "offset"
 CONF_IQAMAH_METHOD = "iqamah_method"
-DEFAULT_IQAMAH_OFFSETS = {
-    "Fajr": 20,
-    "Dhuhr": 15,
-    "Asr": 15,
-    "Maghrib": 10,
-    "Isha": 15
-}
+DEFAULT_IQAMAH_OFFSETS = {"Fajr": 20, "Dhuhr": 15, "Asr": 15, "Maghrib": 10, "Isha": 15}
 
 CALC_METHODS = {
     "Jafari": "jafari",
@@ -40,7 +34,7 @@ CALC_METHODS = {
     "Russia": "russia",
     "Ireland - Islamic Cultural Centre of Ireland (ICCI)": "ie-icci",
     "Ireland - Muslim Community North Dublin (MCND)": "ie-mcnd",
-    "Ireland - Hansfield Islamic Cultural Centre (HICC)": "ie-hicc"
+    "Ireland - Hansfield Islamic Cultural Centre (HICC)": "ie-hicc",
 }
 
 DEFAULT_CALC_METHOD: Final = "ie-icci"
