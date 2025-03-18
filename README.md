@@ -11,13 +11,13 @@ Muslim Prayer Companion is a HACS component built to deliver precise prayer time
 
 **This integration will set up the following platforms.**
 
-Platform | Description
--- | --
-`sensor` | Show prayer times information.
+| Platform | Description                    |
+| -------- | ------------------------------ |
+| `sensor` | Show prayer times information. |
 
 ## Installation
 
-Using HACS add the repo, go to settings, integrations, add "Muslim prayer companion" choose calc method 
+Using HACS add the repo, go to settings, integrations, add "Muslim prayer companion" choose calc method
 
 ## Configuration is done in the UI
 
@@ -25,7 +25,7 @@ Using HACS add the repo, go to settings, integrations, add "Muslim prayer compan
 
 If you want to contribute to this please read the [Contribution guidelines](CONTRIBUTING.md)
 
-***
+---
 
 [muslim-prayer-companion]: https://github.com/amaharek/muslim-prayer-companion
 [buymecoffee]: https://www.buymeacoffee.com/amaharek
