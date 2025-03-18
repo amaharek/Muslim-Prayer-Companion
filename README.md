@@ -131,7 +131,7 @@ The integration creates the following sensors:
 
 Here is an example of the sensor data in JSON format:
 
-````json
+```json
 {
   "fajr": "2024-02-10T05:00:00Z",
   "sunrise": "2024-02-10T06:30:00Z",
@@ -155,6 +155,7 @@ Here is an example of the sensor data in JSON format:
   "next_prayer": "2024-02-10T12:00:00Z",
   "next_prayer_name": "Dhuhr"
 }
+```
 
 ## Testing and Development
 
@@ -163,4 +164,13 @@ To run tests and ensure code quality, use the following commands:
 ```bash
 poetry run pytest --cov custom_components/ tests/
 poetry run pre-commit run --all-files
-````
+```
+
+[muslim_prayer_companion]: https://github.com/amaharek/muslim_prayer_companion
+[commits-shield]: https://img.shields.io/github/commit-activity/y/amaharek/muslim_prayer_companion.svg?style=for-the-badge
+[commits]: https://github.com/amaharek/muslim_prayer_companion/commits/{branch}
+[license-shield]: https://img.shields.io/github/license/amaharek/muslim_prayer_companion.svg?style=for-the-badge
+[releases-shield]: https://img.shields.io/github/release/amaharek/muslim_prayer_companion.svg?style=for-the-badge
+[releases]: https://github.com/amaharek/muslim_prayer_companion/releases
+[downloads-shield]: https://img.shields.io/github/downloads/amaharek/muslim_prayer_companion/total.svg?style=for-the-badge
+[downloads]: https://github.com/amaharek/muslim_prayer_companion/releases
