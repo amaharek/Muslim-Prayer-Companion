@@ -7,6 +7,13 @@ from datetime import date, datetime, timedelta
 
 import homeassistant.util.dt as dt_util
 import pytest
+from homeassistant.util.dt import as_utc
+from test_helpers import (
+    create_fake_config_entry,
+    create_fake_hass,
+    dummy_hijri_date,
+    dummy_prayer_times,
+)
 
 # Import components from the integration.
 from custom_components.muslim_prayer_companion import (
@@ -14,13 +21,6 @@ from custom_components.muslim_prayer_companion import (
     const,
     coordinator,
     sensor,
-)
-from homeassistant.util.dt import as_utc
-from test_helpers import (
-    create_fake_config_entry,
-    create_fake_hass,
-    dummy_hijri_date,
-    dummy_prayer_times,
 )
 
 
