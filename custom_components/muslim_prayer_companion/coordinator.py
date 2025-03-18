@@ -141,6 +141,39 @@ def get_hour_offset_fix(non_standard_str: str, standard_str: str) -> int:
     return 0
 
 
+def parse_prayer_times_wp_plugin(prayers: dict, hour_offset: int) -> dict:
+    """Parse prayer times from the JSON response."""
+    return {
+        "Fajr": format_time(get_time_list(prayers["fajr_begins"][0:5]), hour_offset),
+        "iqamah_fajr": format_time(
+            get_time_list(prayers["fajr_jamah"][0:5]), hour_offset
+        ),
+        "Sunrise": format_time(get_time_list(prayers["sunrise"][0:5]), hour_offset),
+        "Dhuhr": format_time(get_time_list(prayers["zuhr_begins"][0:5]), hour_offset),
+        "iqamah_dhuhr": format_time(
+            get_time_list(prayers["zuhr_jamah"][0:5]), hour_offset
+        ),
+        "Asr": format_time(get_time_list(prayers["asr_mithl_1"][0:5]), hour_offset),
+        "iqamah_asr": format_time(
+            get_time_list(prayers["asr_jamah"][0:5]), hour_offset
+        ),
+        "Sunset": format_time(
+            get_time_list(prayers["maghrib_begins"][0:5]), hour_offset
+        ),
+        "Maghrib": format_time(
+            get_time_list(prayers["maghrib_begins"][0:5]), hour_offset
+        ),
+        "iqamah_maghrib": format_time(
+            get_time_list(prayers["maghrib_jamah"][0:5]), hour_offset
+        ),
+        "Isha": format_time(get_time_list(prayers["isha_begins"][0:5]), hour_offset),
+        "iqamah_isha": format_time(
+            get_time_list(prayers["isha_jamah"][0:5]), hour_offset
+        ),
+        "Midnight": midnight,
+    }
+
+
 def get_prayers_by_wp_plugin(url: str, name: str, standard_maghrib: str, midnight: str):
     """
     Get the prayers from a WordPress site with the Daily Prayer Time plugin.
@@ -154,44 +187,34 @@ def get_prayers_by_wp_plugin(url: str, name: str, standard_maghrib: str, midnigh
     Returns:
         dict: Prayer times information
     """
+
     json_resp = get_json_response(url)
-    if json_resp:
-        try:
-            wp_prayers = json_resp[0]
-            hr_offset = get_hour_offset_fix(
-                wp_prayers["maghrib_begins"][0:5], standard_maghrib
-            )
-            prayer_times_info = {
-                "Fajr": format_time(
-                    get_time_list(wp_prayers["fajr_begins"][0:5]), hr_offset
-                ),
-                "Sunrise": format_time(
-                    get_time_list(wp_prayers["sunrise"][0:5]), hr_offset
-                ),
-                "Dhuhr": format_time(
-                    get_time_list(wp_prayers["zuhr_begins"][0:5]), hr_offset
-                ),
-                "Asr": format_time(
-                    get_time_list(wp_prayers["asr_mithl_1"][0:5]), hr_offset
-                ),
-                "Sunset": format_time(
-                    get_time_list(wp_prayers["maghrib_begins"][0:5]), hr_offset
-                ),
-                "Maghrib": format_time(
-                    get_time_list(wp_prayers["maghrib_begins"][0:5]), hr_offset
-                ),
-                "Isha": format_time(
-                    get_time_list(wp_prayers["isha_begins"][0:5]), hr_offset
-                ),
-                "Imsak": format_time(
-                    get_time_list(wp_prayers["maghrib_begins"][0:5]), hr_offset
-                ),
-                "Midnight": midnight,
-            }
-            return prayer_times_info
-        except Exception as e:
-            LOGGER.info(f"Failed to retrieve prayer from {name}, JSON parse error: {e}")
-    return None
+    if not json_resp:
+        LOGGER.info(f"Failed to retrieve prayer from {name}, no JSON response.")
+        return None
+
+    try:
+        today_prayers = json_resp[0]
+        today_hour_offset = get_hour_offset_fix(
+            today_prayers["maghrib_begins"][0:5], standard_maghrib
+        )
+        today_prayer_times = parse_prayer_times_wp_plugin(
+            today_prayers, today_hour_offset
+        )
+
+        tomorrow_prayers = json_resp[1]
+        tomorrow_hour_offset = get_hour_offset_fix(
+            tomorrow_prayers["maghrib_begins"][0:5], standard_maghrib
+        )
+        tomorrow_prayer_times = parse_prayer_times_wp_plugin(
+            tomorrow_prayers, tomorrow_hour_offset
+        )
+
+        return today_prayer_times, tomorrow_prayer_times
+
+    except Exception as e:
+        LOGGER.info(f"Failed to retrieve prayer from {name}, JSON parse error: {e}")
+        return None
 
 
 # --- Coordinator Class ---
@@ -300,10 +323,10 @@ class MuslimPrayerCompanionDataUpdateCoordinator(DataUpdateCoordinator[dict[str,
             self.hass.config.latitude, self.hass.config.longitude, "isna"
         )
         url = f"https://{calc_method.split('-')[1]}.ie/wp-json/dpt/v1/prayertime?filter=today"
-        prayer_times_info = get_prayers_by_wp_plugin(
+        today_prayer_times_info, tomorrow_prayer_times_info = get_prayers_by_wp_plugin(
             url, calc_method, st_maghrib, midnight
         )
-        return prayer_times_info if prayer_times_info else isna_prayers
+        return today_prayer_times_info if today_prayer_times_info else isna_prayers
 
     def get_new_prayer_times(self) -> dict[str, str]:
         """Fetch prayer times for the target date using the configured calculation method.
@@ -315,7 +338,7 @@ class MuslimPrayerCompanionDataUpdateCoordinator(DataUpdateCoordinator[dict[str,
         calc_method = self.calc_method
         if calc_method == "ie-icci":
             prayer_times = self._get_prayer_times_ie_icci(target_date)
-        elif calc_method in ["ie-mcnd", "ie-hicc"]:
+        elif calc_method in ["ie-mcnd", "ie-hicc", "ie-sdic"]:
             prayer_times = self._get_prayer_times_wp_plugin(calc_method, target_date)
         else:
             prayer_times = self._get_prayer_times_standard(target_date)
