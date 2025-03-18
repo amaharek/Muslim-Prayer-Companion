@@ -35,6 +35,7 @@ CALC_METHODS = {
     "Ireland - Islamic Cultural Centre of Ireland (ICCI)": "ie-icci",
     "Ireland - Muslim Community North Dublin (MCND)": "ie-mcnd",
     "Ireland - Hansfield Islamic Cultural Centre (HICC)": "ie-hicc",
+    "Ireland - South Dublin Islamic Centre (SDIC)": "ie-sdic",
 }
 
 DEFAULT_CALC_METHOD: Final = "ie-icci"
