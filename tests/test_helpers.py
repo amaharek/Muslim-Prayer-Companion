@@ -24,7 +24,7 @@ def create_fake_hass():
 
 
 def create_fake_config_entry(
-    domain="muslim-prayer-companion", options=None, entry_id="test123"
+    domain="muslim_prayer_companion", options=None, entry_id="test123"
 ):
     """Return a fake ConfigEntry with given options."""
     if options is None:

@@ -7,6 +7,6 @@
   "homeassistant": "2025.2.4",
   "hacs": "2.0.1",
   "zip_release": true,
-  "filename": "muslim-prayer-companion.zip",
-  "file": "custom_components/muslim-prayer-companion"
+  "filename": "muslim_prayer_companion.zip",
+  "file": "custom_components/muslim_prayer_companion"
 }

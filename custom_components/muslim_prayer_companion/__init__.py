@@ -2,7 +2,7 @@
 Custom component to get Muslim Prayer Companion.
 
 For more details about this component, please refer to the documentation at
-https://github.com/amaharek/muslim-prayer-companion
+https://github.com/amaharek/muslim_prayer_companion
 """
 
 from __future__ import annotations

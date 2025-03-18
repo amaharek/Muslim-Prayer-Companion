@@ -1,10 +1,10 @@
 {
-  "domain": "muslim-prayer-companion",
+  "domain": "muslim_prayer_companion",
   "name": "Muslim Prayer Companion",
   "codeowners": ["@amaharek"],
   "config_flow": true,
-  "issue_tracker": "https://github.com/amaharek/muslim-prayer-companion/issues",
-  "documentation": "https://github.com/amaharek/muslim-prayer-companion",
+  "issue_tracker": "https://github.com/amaharek/muslim_prayer_companion/issues",
+  "documentation": "https://github.com/amaharek/muslim_prayer_companion",
   "iot_class": "cloud_polling",
   "version": "2.2.0",
   "requirements": ["prayer-times-calculator==0.0.12", "hijri-converter==2.3.1"],
