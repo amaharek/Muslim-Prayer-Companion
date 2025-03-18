@@ -1,4 +1,5 @@
 """Platform to retrieve Muslim Prayer Companion information for Home Assistant."""
+
 from datetime import datetime
 from logging import getLogger
 
@@ -17,13 +18,27 @@ from .const import DOMAIN, NAME
 _LOGGER = getLogger(__package__)
 SENSOR_TYPES: tuple[SensorEntityDescription, ...] = (
     # Prayer Times
-    SensorEntityDescription(key="Fajr", name="Fajr Prayer", device_class=SensorDeviceClass.TIMESTAMP),
-    SensorEntityDescription(key="Sunrise", name="Sunrise Time", device_class=SensorDeviceClass.TIMESTAMP),
-    SensorEntityDescription(key="Dhuhr", name="Dhuhr Prayer", device_class=SensorDeviceClass.TIMESTAMP),
-    SensorEntityDescription(key="Asr", name="Asr Prayer", device_class=SensorDeviceClass.TIMESTAMP),
-    SensorEntityDescription(key="Maghrib", name="Maghrib Prayer", device_class=SensorDeviceClass.TIMESTAMP),
-    SensorEntityDescription(key="Isha", name="Isha Prayer", device_class=SensorDeviceClass.TIMESTAMP),
-    SensorEntityDescription(key="Midnight", name="Midnight Time", device_class=SensorDeviceClass.TIMESTAMP),
+    SensorEntityDescription(
+        key="Fajr", name="Fajr Prayer", device_class=SensorDeviceClass.TIMESTAMP
+    ),
+    SensorEntityDescription(
+        key="Sunrise", name="Sunrise Time", device_class=SensorDeviceClass.TIMESTAMP
+    ),
+    SensorEntityDescription(
+        key="Dhuhr", name="Dhuhr Prayer", device_class=SensorDeviceClass.TIMESTAMP
+    ),
+    SensorEntityDescription(
+        key="Asr", name="Asr Prayer", device_class=SensorDeviceClass.TIMESTAMP
+    ),
+    SensorEntityDescription(
+        key="Maghrib", name="Maghrib Prayer", device_class=SensorDeviceClass.TIMESTAMP
+    ),
+    SensorEntityDescription(
+        key="Isha", name="Isha Prayer", device_class=SensorDeviceClass.TIMESTAMP
+    ),
+    SensorEntityDescription(
+        key="Midnight", name="Midnight Time", device_class=SensorDeviceClass.TIMESTAMP
+    ),
     # Hijri Date Information
     SensorEntityDescription(key="hijri_date", name="Hijri Date"),
     SensorEntityDescription(key="hijri_day", name="Hijri Day"),
@@ -33,14 +48,31 @@ SENSOR_TYPES: tuple[SensorEntityDescription, ...] = (
     SensorEntityDescription(key="hijri_date_readable", name="Hijri Date Readable"),
     SensorEntityDescription(key="hijri_day_month_readable", name="Hijri Day and Month"),
     # Iqamah Times
-    SensorEntityDescription(key="iqamah_Fajr", name="Iqamah Fajr", device_class=SensorDeviceClass.TIMESTAMP),
-    SensorEntityDescription(key="iqamah_Dhuhr", name="Iqamah Dhuhr", device_class=SensorDeviceClass.TIMESTAMP),
-    SensorEntityDescription(key="iqamah_Asr", name="Iqamah Asr", device_class=SensorDeviceClass.TIMESTAMP),
-    SensorEntityDescription(key="iqamah_Maghrib", name="Iqamah Maghrib", device_class=SensorDeviceClass.TIMESTAMP),
-    SensorEntityDescription(key="iqamah_Isha", name="Iqamah Isha", device_class=SensorDeviceClass.TIMESTAMP),
+    SensorEntityDescription(
+        key="iqamah_Fajr", name="Iqamah Fajr", device_class=SensorDeviceClass.TIMESTAMP
+    ),
+    SensorEntityDescription(
+        key="iqamah_Dhuhr",
+        name="Iqamah Dhuhr",
+        device_class=SensorDeviceClass.TIMESTAMP,
+    ),
+    SensorEntityDescription(
+        key="iqamah_Asr", name="Iqamah Asr", device_class=SensorDeviceClass.TIMESTAMP
+    ),
+    SensorEntityDescription(
+        key="iqamah_Maghrib",
+        name="Iqamah Maghrib",
+        device_class=SensorDeviceClass.TIMESTAMP,
+    ),
+    SensorEntityDescription(
+        key="iqamah_Isha", name="Iqamah Isha", device_class=SensorDeviceClass.TIMESTAMP
+    ),
     # Next Prayer Sensor
-    SensorEntityDescription(key="next_prayer", name="Next Prayer", device_class=SensorDeviceClass.TIMESTAMP),
+    SensorEntityDescription(
+        key="next_prayer", name="Next Prayer", device_class=SensorDeviceClass.TIMESTAMP
+    ),
 )
+
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -55,6 +87,7 @@ async def async_setup_entry(
         MuslimPrayerCompanionTimeSensor(coordinator, description)
         for description in SENSOR_TYPES
     )
+
 
 class MuslimPrayerCompanionTimeSensor(
     CoordinatorEntity[MuslimPrayerCompanionDataUpdateCoordinator], SensorEntity
@@ -97,10 +130,16 @@ class MuslimPrayerCompanionTimeSensor(
                     return parse_datetime(value)
 
                 else:
-                    _LOGGER.error("Unexpected type for %s: %s", self.entity_description.key, type(value))
+                    _LOGGER.error(
+                        "Unexpected type for %s: %s",
+                        self.entity_description.key,
+                        type(value),
+                    )
                     return None
             except Exception as e:
-                _LOGGER.error("Error parsing datetime for %s: %s", self.entity_description.key, e)
+                _LOGGER.error(
+                    "Error parsing datetime for %s: %s", self.entity_description.key, e
+                )
                 return None
 
         return value

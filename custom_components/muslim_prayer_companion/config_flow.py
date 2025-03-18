@@ -1,28 +1,29 @@
 """Config flow for Muslim Prayer Companion integration."""
+
 from __future__ import annotations
 
-import voluptuous as vol
+from logging import getLogger
 
+import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.const import CONF_LATITUDE, CONF_LONGITUDE
 from homeassistant.data_entry_flow import FlowResult
-from logging import getLogger
 
 _LOGGER = getLogger(__package__)
 try:
-    from .const import (
-        DOMAIN,
+    from .const import (  # DEFAULT_IQAMAH_METHOD,; DEFAULT_IQAMAH_OFFSETS,
         CALC_METHODS,
         DEFAULT_CALC_METHOD,
-        # DEFAULT_IQAMAH_METHOD,
-        # DEFAULT_IQAMAH_OFFSETS,
+        DOMAIN,
     )
 except ImportError as e:
     _LOGGER.error(f"Error importing constants: {e}")
 
 DATA_SCHEMA = vol.Schema(
     {
-        vol.Required("calculation_method", default=DEFAULT_CALC_METHOD): vol.In(CALC_METHODS),
+        vol.Required("calculation_method", default=DEFAULT_CALC_METHOD): vol.In(
+            CALC_METHODS
+        ),
         # vol.Required("iqamah_method", default=DEFAULT_IQAMAH_METHOD): vol.In(["offset", "api"]),
         # For offset-based iqamah, expect a mapping for each prayer. Offsets in minutes.
         # vol.Optional("iqamah_offsets", default=DEFAULT_IQAMAH_OFFSETS): {
@@ -38,6 +39,7 @@ DATA_SCHEMA = vol.Schema(
     }
 )
 
+
 class MuslimPrayerCompanionConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Muslim Prayer Companion."""
 
@@ -48,7 +50,9 @@ class MuslimPrayerCompanionConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors = {}
         if user_input is not None:
             # In a real integration, validate the API endpoints if provided.
-            return self.async_create_entry(title="Muslim Prayer Companion", data=user_input)
+            return self.async_create_entry(
+                title="Muslim Prayer Companion", data=user_input
+            )
 
         return self.async_show_form(
             step_id="user", data_schema=DATA_SCHEMA, errors=errors

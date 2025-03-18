@@ -1,0 +1,86 @@
+# Check out https://pre-commit.com/ for documentation
+# and https://pre-commit.com/hooks.html for more hooks
+minimum_pre_commit_version: 2.9.0
+repos:
+  # --- Built-in hooks ---
+  - hooks:
+      - id: check-symlinks
+      - id: check-case-conflict
+      - id: fix-byte-order-marker
+      - id: end-of-file-fixer
+      - id: check-merge-conflict
+      - id: debug-statements
+      - id: check-toml
+      - id: check-json
+        exclude: >
+          (?x)^(
+            .vscode/settings.json|
+            .vscode/launch.json|
+            .devcontainer/devcontainer.json
+          )$
+      - id: check-yaml
+        exclude: ^recipes/.*
+    repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+
+  # --- Commit msg checks ---
+  - hooks:
+      - id: commitizen
+        stages: ["commit-msg"]
+    repo: https://github.com/commitizen-tools/commitizen
+    rev: v3.28.0
+
+  # --- Linters ---
+  - hooks:
+      - id: black
+    repo: https://github.com/psf/black
+    rev: 25.1.0
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    hooks:
+      - id: prettier
+        exclude: ^custom_components/muslim_prayer_companion/translations|CHANGELOG.md
+    rev: v4.0.0-alpha.8
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v3.19.1
+    hooks:
+      - id: pyupgrade
+        args: [--py39-plus]
+  - repo: https://github.com/adrienverge/yamllint.git
+    rev: v1.35.1
+    hooks:
+      - id: yamllint
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.9
+    hooks:
+      - id: bandit
+        args: ["-c", "pyproject.toml"]
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        args: ["--profile", "black"]
+  - repo: https://github.com/floatingpurr/sync_with_poetry
+    rev: "1.1.0"
+    hooks:
+      - id: sync_with_poetry
+        args: []
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.3.0
+    hooks:
+      - id: codespell
+        additional_dependencies:
+          - tomli
+        exclude_types: [csv, json]
+        exclude: (^tests/fixtures/|CHANGELOG.md)
+
+ci:
+  autofix_commit_msg: |
+    style: auto fixes from pre-commit.com hooks
+
+    for more information, see https://pre-commit.ci
+  autofix_prs: true
+  autoupdate_branch: ""
+  autoupdate_commit_msg: "build: pre-commit autoupdate"
+  autoupdate_schedule: weekly
+  skip: []
+  submodules: false
