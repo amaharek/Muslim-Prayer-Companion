@@ -35,3 +35,7 @@ If you want to contribute to this please read the [Contribution guidelines](CONT
 [license-shield]: https://img.shields.io/github/license/amaharek/muslim_prayer_companion.svg?style=for-the-badge
 [releases-shield]: https://img.shields.io/github/release/amaharek/muslim_prayer_companion.svg?style=for-the-badge
 [releases]: https://github.com/amaharek/muslim_prayer_companion/releases
+
+```
+poetry run pytest --cov custom_components/ tests/
+```
