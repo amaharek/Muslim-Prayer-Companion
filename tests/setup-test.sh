@@ -5,15 +5,15 @@
 
 set -e
 
-echo "Setting up virtual environment for testing..."
-python3 -m venv venv
-source venv/bin/activate
+# echo "Setting up virtual environment for testing..."
+# python3 -m venv venv
+# source venv/bin/activate
 
-echo "Upgrading pip..."
-pip install --upgrade pip
+# echo "Upgrading pip..."
+# pip install --upgrade pip
 
-echo "Installing test dependencies..."
-pip install pytest homeassistant
+# echo "Installing test dependencies..."
+# pip install pytest homeassistant
 
 echo "Running tests..."
 pytest --maxfail=1 --disable-warnings -q tests/test_integration.py 
