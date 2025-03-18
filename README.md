@@ -38,4 +38,5 @@ If you want to contribute to this please read the [Contribution guidelines](CONT
 
 ```
 poetry run pytest --cov custom_components/ tests/
+poetry run pre-commit run --all-files
 ```
